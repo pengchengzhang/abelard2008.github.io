@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <meta name="author" content="Joe Armstrong" />
+    <meta name="author" content="Dillon Peng" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     
     <title>{{page.title}}</title>
@@ -23,7 +23,7 @@
   <body>
     <div class="navbar">
       <div class="navbar-inner">
-	<a class="brand" href="/index.html">Joe Armstrong - Erlang and other stuff</a>
+	<a class="brand" href="/index.html">Dillon Peng's computer technology and other stuff</a>
 	<ul class="nav">
 	  <li><a href="/index.html">Home</a></li>
 	  <li><a href="/archive.html">Archive</a></li>
@@ -39,7 +39,7 @@
       <div class="row-fluid">
 	<div class="span7 offset1">
 	  <p>
-	    <a href="https://twitter.com/joeerl" class="twitter-follow-button" 
+	    <a href="https://twitter.com/abelard2008" class="twitter-follow-button" 
 	       data-show-count="false" data-show-screen-name="false">Follow</a>
 	    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 	  </p>
@@ -47,19 +47,6 @@
 	  {{content}}
 	</div>
 	<div class="span3">
-	  <h2>Books</h2>
-	  <p>
-	    <img src="/images/jaerlang2_small.jpg" alt="Programming Erlang book"/>
-	    <br/>
-	    <a href="http://pragprog.com/book/jaerlang2/programming-erlang">
-	    Programming Erlang</a>
-	  </p>
-	  
-	  <p>
-	    <img src="/images/joe_thesis.jpg" alt="joe thesis"/><br/>
-	    <b>Making Reliable Distributed Systems in the Presence of software errors</b>
-	    <a href="http://www.sics.se/~joe/thesis/armstrong_thesis_2003.pdf">download</a>
-	  </p>
 	</div>
       </div>
     </div>
@@ -67,20 +54,32 @@
     <!-- Footer  ==================================== -->
     <footer class="footer">
       <div class="container">
-	<p>&copy; 2013 Joe Armstrong</p>
+	<p>&copy; 2015 Dillon Peng</p>
 	  Theme and code from <a href="https://github.com/mojombo">Tom
 	  Preston-Werner</a>.<br /> Hosted by <a
 	  href="https://github.com/networc/networc.github.com/">GitHub</a>
 	  and powered by <a
 	  href="https://github.com/mojombo/jekyll">Jekyll</a>.
-	  Source code <a href="https://github.com/joearms/joearms.github.com">here</a>.
+	  Source code <a href="https://github.com/abelard2008/abelard2008.github.io">here</a>.
 	</p>
 	<p>
-	  joearms@gmail.com <a href="http://github.com/joearms/">github.com/joearms</a>
-	  <a href="http://twitter.com/joeerl/">twitter.com/joeerl</a>
+	  pengcz.nwpu@gmail.com <a href="http://github.com/abelard2008/">github.com/abelard2008</a>
+	  <a href="http://twitter.com/abelard2008/">twitter.com/abelard2008</a>
 	</p>
       </div>
     </footer>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = 'abelard2008githubio',
+    disqus_identifier = '{{ page.path | split:'/' | last | cgi_escape }}',
+    disqus_url        = '{{ site.url }}{{ page.url | uri_escape }}';    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
 
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>

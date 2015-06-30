@@ -1,35 +1,32 @@
 ---
 layout: default_2
-title: Joe Armstrong
+title: Dillon Peng
 ---
-
 <div id="home">
   <h2>Blog Posts</h2>
 
   <ul class="posts">
     {% for post in site.posts %}
-      <li><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ post.url }}">{{ post.title }}</a></li>
+      <li><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ post.url }}">{{ post.title }}</a> (<a href="{{ post.url }}#disqus_thread" data-disqus-identifier="{{ post.path | split:'/' | last | cgi_escape }}">View Comments</a>)</li>
     {% endfor %}
   </ul>
 
-  <h2>Movies</h2>
-
-  <ul>
-    <li>
-      <a href="https://www.youtube.com/watch?v=qyVvGjNjBOA">Erlang - the movie</a> The original Erlang movie - before my hair went grey
-    </li>
-
-    <li> <a href="http://www.gar1t.com/blog/2013/03/21/erlang-the-movie-ii-the-sequel/">Erlang the movie II - the sequel</a> OTP rebranded as <i>Outlaw Techno Psychobitch</i>
-    </li>
-
-    <li>
-      <a href="https://www.youtube.com/watch?v=u41GEwIq2mE&list=UUDLl_-lfEBsXw0EbVkhKviQ">
-	Erlang Interview at Rackspace</a> Good overview of the history of Erlang
-	and what problems Erlang solves.
-    </li>
-
-  </ul>
   <p></p>
 
 </div>
 
+<!-- Insert Disqus comment count embed code here... -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = 'abelard2008githubio',
+    disqus_identifier = '{{ page.path | split:'/' | last | cgi_escape }}',
+    disqus_url        = '{{ site.url }}{{ page.url | uri_escape }}';
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
