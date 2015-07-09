@@ -1,0 +1,151 @@
+---
+layout: post
+title: "produce static blog with org-mode and jekyll"
+tagline: "Storm Compile"
+tags: ["tool"]
+
+---
+{% include JB/setup %}
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. to export my org</a>
+<ul>
+<li><a href="#sec-1-1">1.1. really want to do great something</a></li>
+<li><a href="#sec-1-2">1.2. next line is coding</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> to export my org</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> really want to do great something</h3>
+<div class="outline-text-3" id="text-1-1">
+<div class="photofloatr">
+  <p><img src="/static/img/rss_1.jpg" 
+     alt="Final pitch"></p>
+  <p>Ella on the final pitch</p>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> next line is coding</h3>
+<div class="outline-text-3" id="text-1-2">
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #f0c674;">limiter</span> = Limiter(attack_coeff, release_coeff, delay, dtype)
+
+<span style="color: #b5bd68;">def</span> <span style="color: #de935f;">callback</span>(in_data, frame_count, time_info, flag):
+    <span style="color: #b5bd68;">if</span> flag:
+        <span style="color: #b5bd68;">print</span>(<span style="color: #8abeb7;">"Playback Error: %i"</span> % flag)
+    <span style="color: #f0c674;">played_frames</span> = counter
+    <span style="color: #f0c674;">counter</span> += frame_count
+    limiter.limit(signal[played_frames:counter], threshold)
+    <span style="color: #b5bd68;">return</span> signal[played_frames:counter], paContinue
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="right" />
+
+<col  class="left" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="right">data</th>
+<th scope="col" class="left">mon</th>
+<th scope="col" class="right">date</th>
+<th scope="col" class="right">year</th>
+<th scope="col" class="left">file</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="right">642</td>
+<td class="left">5月</td>
+<td class="right">25</td>
+<td class="right">2011</td>
+<td class="left"><code>alarm_signal.c</code></td>
+</tr>
+
+<tr>
+<td class="right">7195</td>
+<td class="left">3月</td>
+<td class="right">10</td>
+<td class="right">22:1</td>
+<td class="left">2</td>
+</tr>
+
+<tr>
+<td class="right">457</td>
+<td class="left">5月</td>
+<td class="right">17</td>
+<td class="right">2011</td>
+<td class="left">attributeTest.c</td>
+</tr>
+
+<tr>
+<td class="right">1177</td>
+<td class="left">3月</td>
+<td class="right">10</td>
+<td class="right">22:1</td>
+<td class="left">1</td>
+</tr>
+
+<tr>
+<td class="right">4096</td>
+<td class="left">2月</td>
+<td class="right">8</td>
+<td class="right">17:0</td>
+<td class="left">6</td>
+</tr>
+
+<tr>
+<td class="right">569514</td>
+<td class="left">10月</td>
+<td class="right">25</td>
+<td class="right">2011</td>
+<td class="left">cscope.out</td>
+</tr>
+
+<tr>
+<td class="right">5448</td>
+<td class="left">5月</td>
+<td class="right">25</td>
+<td class="right">2011</td>
+<td class="left">ctrlc2</td>
+</tr>
+
+<tr>
+<td class="right">330</td>
+<td class="left">5月</td>
+<td class="right">25</td>
+<td class="right">2011</td>
+<td class="left">ctrlc2.c</td>
+</tr>
+
+<tr>
+<td class="right">580</td>
+<td class="left">5月</td>
+<td class="right">26</td>
+<td class="right">2011</td>
+<td class="left"><code>diffct_funcDecl.c</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>

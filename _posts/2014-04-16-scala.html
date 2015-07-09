@@ -1,0 +1,1050 @@
+---
+layout: post
+title: "scala中的新知识"
+tags: ["language"]
+---
+{% include JB/setup %}
+
+<p>
+由于spark<sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup>是用scala语言实现的，不得不又学习一门新的语言：集函数式和面向
+对象于一身的语言。在学习 Programming in Scala<sup><a id="fnr.2" name="fnr.2" class="footref" href="#fn.2">2</a></sup>，确实又有很多值得
+刷新的知识，必须先记录的有： 模式匹配(pattern match)、不可变和可变、多
+重继承、协变和逆变、按名参数(call-by-name parameters)和Actor模式
+</p>
+
+<div id="outline-container-sec-0-1" class="outline-3">
+<h3 id="sec-0-1">case classes</h3>
+<div class="outline-text-3" id="text-0-1">
+<p>
+case classes 是用在模式匹配中的特殊的类。当定义class时，如果用了case修饰符
+，编译器将为你做四件事情：
+</p>
+<ul class="org-ul">
+<li>添加一个以类名命名的工厂方法，意味着：
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>case class Var(x: String)
+<span class="linenr">2: </span>val a = Var(<span style="color: #8abeb7;">"x"</span>) //&#20135;&#29983;&#19968;&#20010;&#23545;&#35937;
+<span class="linenr">3: </span>
+<span class="linenr">4: </span>class Varr(x: String)
+<span class="linenr">5: </span>val b = Varr(<span style="color: #8abeb7;">"x"</span>) // error: not found: value Varr
+<span class="linenr">6: </span>
+<span class="linenr">7: </span>val b = new Varr(<span style="color: #8abeb7;">"x"</span>)
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>参数列表中的所有参数都会被编译器自动添加一个val前缀，使得每个参数都
+成为一个字段。
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr"> 1: </span>scala&gt; case class Var(x: String)
+<span class="linenr"> 2: </span>scala&gt; val a= new Var(<span style="color: #8abeb7;">"x"</span>)
+<span class="linenr"> 3: </span>scala&gt; a.x
+<span class="linenr"> 4: </span>res9: String = x
+<span class="linenr"> 5: </span>
+<span class="linenr"> 6: </span>class Varr(x: String)
+<span class="linenr"> 7: </span>val b = new Varr(<span style="color: #8abeb7;">"x"</span>) //error: value x is not a member of Varr
+<span class="linenr"> 8: </span>
+<span class="linenr"> 9: </span>scala&gt; class Var(val x: String)
+<span class="linenr">10: </span>
+<span class="linenr">11: </span>OR
+<span class="linenr">12: </span>
+<span class="linenr">13: </span>scala&gt; class Var(y: String) {
+<span class="linenr">14: </span>     | def x = y }
+<span class="linenr">15: </span>
+<span class="linenr">16: </span>scala&gt; val b = new Varr(<span style="color: #8abeb7;">"x"</span>)
+<span class="linenr">17: </span>b: Varr = Varr@4bbbd16b
+<span class="linenr">18: </span>
+<span class="linenr">19: </span>scala&gt; b.x
+<span class="linenr">20: </span>res7: String = x
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>编译器给case classes自动添加toString、hashCode和equals的实现。那将会
+print、hash和compare包含其类和所有它的参数的整棵树。另外，因
+为”==“总是委托给euqals，意味着case classes的元素总是在结构上被比较。
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>scala&gt; println(op)
+<span class="linenr">2: </span>BinOp(+,Number(1.0),Var(x))
+<span class="linenr">3: </span>scala&gt; op.right == Var(<span style="color: #8abeb7;">"x"</span>)
+<span class="linenr">4: </span>res3: Boolean = true
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>编译器添加了一个copy方法到case classes中，用于被修改的copy。
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>scala&gt; op.copy(operator = <span style="color: #8abeb7;">"-"</span>)
+<span class="linenr">2: </span>res4: BinOp = BinOp(-,Number(1.0),Var(x))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-0-2" class="outline-3">
+<h3 id="sec-0-2">模式匹配<sup><a id="fnr.3" name="fnr.3" class="footref" href="#fn.3">3</a></sup> <sup>, </sup><sup><a id="fnr.4" name="fnr.4" class="footref" href="#fn.4">4</a></sup></h3>
+<div class="outline-text-3" id="text-0-2">
+<p>
+通常情况下，模式匹配是一种技术，它对一些对象进行命名并且使用已知的
+结构将数据结构和对象分解成该技术内部的组成元素，对Scala而言，它的
+模式匹配有case classes、extractor等种类，每一种内部都有自己的组成
+元素。
+scala的match表达式可以看成为java风格的switch，即一个java的switch能
+表达成match表达式，其中每个模式是一个常量，且最后是一 个通配符
+default。但区别表现在三个方面：(1) scala的match是一个表达式，例如
+它总是产生一个值(java的switch是一个语句称为statement) (2)scala的选
+项表达式从不会转入到下一个case中(java的case必须有break来达到该目的)
+(3) 如果都不匹配，将会抛出MatchError，java的default是可有可无的，
+即没有default不会抛出异常。另外，也是最重要的，scala不仅能匹配java
+所支持的有限的基本数据类型和基本数据类型的封装匹配，它通过case
+classes支持构造器模式(constructor pattern)外，还有通配符模式
+(wildcard pattern)、常量模式(constant pattern)、变量模式(variable
+pattern)、序列模式(sequence pattern)、元组模式(tuple pattern)和类
+型模式(typed pattern)
+</p>
+
+<p>
+Scala的模式匹配的理论来自于论文“A Term Pattern-Match Compiler
+Inspired by Finite Automata Theory"，在Burak Emir的博士论文“Object-Oriented Pattern
+Matching”，描述了其理论与实现。
+</p>
+
+<ul class="org-ul">
+<li>通配符模式
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>expr match {
+<span class="linenr">2: </span>case BinOp(op, left, right) =&gt; println(expr +<span style="color: #8abeb7;">" is a binary operation"</span>) 
+<span class="linenr">3: </span>case _ =&gt;  // <span style="color: #8abeb7;">"_"</span>&#25903;&#25345;&#20219;&#20309;&#23545;&#20687;
+<span class="linenr">4: </span>}
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>常量模式
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>def describe(x: Any) = x match {
+<span class="linenr">2: </span>case 5 =&gt; <span style="color: #8abeb7;">"five"</span>
+<span class="linenr">3: </span>case true =&gt; <span style="color: #8abeb7;">"truth"</span>
+<span class="linenr">4: </span>case <span style="color: #8abeb7;">"hello"</span> =&gt; <span style="color: #8abeb7;">"hi!"</span>
+<span class="linenr">5: </span>case Nil =&gt; <span style="color: #8abeb7;">"the empty list"</span>
+<span class="linenr">6: </span>case _ =&gt; <span style="color: #8abeb7;">"something else"</span>
+<span class="linenr">7: </span>}
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>变量模式
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>val pi = math.Pi
+<span class="linenr">2: </span>E match {
+<span class="linenr">3: </span>case pi =&gt; <span style="color: #8abeb7;">"strange math? Pi = "</span>+ pi
+<span class="linenr">4: </span>}
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>构造器模式
+</li>
+</ul>
+<p>
+构造器模式(Constructor patterns)可以用于定义所谓的深度匹配(deep matches)。
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr"> 1: </span>ex1.
+<span class="linenr"> 2: </span>abstract class Expr
+<span class="linenr"> 3: </span>case class Var(name: String) extends Expr
+<span class="linenr"> 4: </span>case class Number(num: Double) extends Expr
+<span class="linenr"> 5: </span>expr match {
+<span class="linenr"> 6: </span>case BinOp(<span style="color: #8abeb7;">"+"</span>, e, Number(0)) =&gt; println(<span style="color: #8abeb7;">"a deep match"</span>)
+<span class="linenr"> 7: </span>case _ =&gt;
+<span class="linenr"> 8: </span>
+<span class="linenr"> 9: </span>ex2.
+<span class="linenr">10: </span>&#27880;&#65306; x <span style="color: #b294bb;">::</span> xs1 &#20026;&#21491;&#32467;&#21512;&#65292;&#20854;::&#26159;&#19968;&#20010;&#31867;&#65292;&#34920;&#31034;&#20026;&#65306; 
+<span class="linenr">11: </span><span style="color: #b294bb;">::</span>(xs1, x) &#21442;&#32771; section 22.1&#30340; The <span style="color: #b294bb;">::</span> class
+<span class="linenr">12: </span>def rev[T](xs: List[T]): List[T] = xs match {
+<span class="linenr">13: </span>case List() =&gt; xs
+<span class="linenr">14: </span>case x <span style="color: #b294bb;">::</span> xs1 =&gt; rev(xs1) <span style="color: #b294bb;">:::</span> List(x) 
+<span class="linenr">15: </span>}
+<span class="linenr">16: </span>}
+</pre>
+</div>
+
+<p>
+Scala允许在模式表达式后面规定条件,这些条件称为模式警卫(pattern guards)。
+如下例的line <a href="#coderef-guards"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-guards');" onmouseout="CodeHighlightOff(this, 'coderef-guards');">4</a>：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>val salaryTable = new Table(200,100) {
+<span class="linenr">2: </span>    reactions += {
+<span class="linenr">3: </span>    case TableUpdated(salaryTable, rows, cols)
+<span id="coderef-guards" class="coderef-off"><span class="linenr">4: </span>        if cols % 2 == 0 =&gt; // ...</span>
+<span class="linenr">5: </span>   }
+<span class="linenr">6: </span>}
+</pre>
+</div>
+<ul class="org-ul">
+<li>序列模式
+</li>
+</ul>
+<p>
+类型有：List 和 Array
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr"> 1: </span>ex1.
+<span class="linenr"> 2: </span>expr match {
+<span class="linenr"> 3: </span>case List(0, _, _) =&gt; println(<span style="color: #8abeb7;">"found it"</span>)
+<span class="linenr"> 4: </span>case _ =&gt;
+<span class="linenr"> 5: </span>}
+<span class="linenr"> 6: </span>
+<span class="linenr"> 7: </span>ex2
+<span class="linenr"> 8: </span>//&#27880;&#65306;_* &#29992;&#20110;&#21305;&#37197;&#20219;&#24847;&#38271;&#24230;&#30340;&#21015;&#34920;
+<span class="linenr"> 9: </span>expr match {
+<span class="linenr">10: </span>case List(0, _*) =&gt; println(<span style="color: #8abeb7;">"found it"</span>)
+<span class="linenr">11: </span>case _ =&gt;
+<span class="linenr">12: </span>}
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>元组模式
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>def tupleDemo(expr: Any) =
+<span class="linenr">2: </span>expr match {
+<span class="linenr">3: </span>case (a, b, c) =&gt; println(<span style="color: #8abeb7;">"matched "</span>+ a + b + c)
+<span class="linenr">4: </span>case _ =&gt;
+<span class="linenr">5: </span>}
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>类型模式
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>def generalSize(x: Any) = x match {
+<span class="linenr">2: </span>case s: String =&gt; s.length
+<span class="linenr">3: </span>case m: Map[_, _] =&gt; m.size
+<span class="linenr">4: </span>case _ =&gt; 1
+<span class="linenr">5: </span>}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-0-3" class="outline-3">
+<h3 id="sec-0-3">模式匹配的用例</h3>
+<div class="outline-text-3" id="text-0-3">
+<p>
+模式匹配无处不在，需要对此有深入的理解，才可以看到它的精髓和发挥到极致。
+</p>
+<ul class="org-ul">
+<li>变量定义
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>scala&gt; val myTuple = (123, <span style="color: #8abeb7;">"abc"</span>)
+<span class="linenr">2: </span>myTuple: (Int, java.lang.String) = (123,abc)
+<span class="linenr">3: </span>scala&gt; val (number, string) = myTuple
+<span class="linenr">4: </span>number: Int = 123
+<span class="linenr">5: </span>string: java.lang.String = abc
+</pre>
+</div>
+<ul class="org-ul">
+<li>用多个case构建部分函数
+</li>
+</ul>
+<p>
+在大括号中的多个case能出现在可以定义函数的任何地方。一个case就是一个函数定
+义，只是更普遍。
+</p>
+
+<p>
+部分函数： 只能对定义域中的部分值进行求值的函数。
+</p>
+
+<p>
+这样的的case序列用于形成部分函数(partial function)。如果传递了一个不被
+支持的参数给这样的函数，将会产生一个运行时的异常。
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>val second: List[Int] =&gt; Int = {
+<span class="linenr">2: </span>case x <span style="color: #b294bb;">::</span> y <span style="color: #b294bb;">::</span> _ =&gt; y
+<span class="linenr">3: </span>}
+<span class="linenr">4: </span>
+<span class="linenr">5: </span>scala&gt; second(List())
+<span class="linenr">6: </span>scala.MatchError: List()
+<span class="linenr">7: </span>at $anonfun$1.apply(&lt;console&gt;:17)
+<span class="linenr">8: </span>at $anonfun$1.apply(&lt;console&gt;:17)
+</pre>
+</div>
+<p>
+如果想要明确定义一个部分函数，必须首先让编译器知道要使用部分函数。像上
+面的定义 List[Int] =&gt; Int 则包括了从Int列表到Int映射的全部函数，不管是
+否这个函数是部分的(因为这里没有列出所有情况)。如果想要只包含部分函数，
+则需要使用关键字PartialFunction，写成PartialFunction[List[Int], Int]。
+如下定义一个部分函数类型：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span id="coderef-part" class="coderef-off"><span class="linenr">1: </span>val second: PartialFunction[List[Int],Int] = {</span>
+<span class="linenr">2: </span>case x <span style="color: #b294bb;">::</span> y <span style="color: #b294bb;">::</span> _ =&gt; y
+<span class="linenr">3: </span>}
+</pre>
+</div>
+
+<p>
+部分函数有个方法isDefinedAt，它用于测试该函数是否在某些特定值中进行了
+定义。这样一来，上面的例子无论遇到什么样Int列表，都会有两个元素true和
+false。因此line <a href="#coderef-part"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-part');" onmouseout="CodeHighlightOff(this, 'coderef-part');">1</a> 经过编译器翻译时，要翻译两次，一次是真实的
+函数实现，一次是对应的isDefinedAt，上面的定义翻译如下：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>new PartialFunction[List[Int], Int] {
+<span class="linenr">2: </span>def apply(xs: List[Int]) = xs match {
+<span class="linenr">3: </span>case x <span style="color: #b294bb;">::</span> y <span style="color: #b294bb;">::</span> _ =&gt; y
+<span class="linenr">4: </span>}
+<span class="linenr">5: </span>def isDefinedAt(xs: List[Int]) = xs match {
+<span class="linenr">6: </span>case x <span style="color: #b294bb;">::</span> y <span style="color: #b294bb;">::</span> _ =&gt; true
+<span class="linenr">7: </span>case _ =&gt; false
+<span class="linenr">8: </span>}
+<span class="linenr">9: </span>}
+</pre>
+</div>
+<p>
+只要出现PartialFunction的地方就会进行这样的翻译，如果申明为Function1或
+没有类型，(只有 =&gt; )则翻译成全函数。
+</p>
+
+<ul class="org-ul">
+<li>for表达式中的模式匹配
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr"> 1: </span>scala&gt; for ((country, city) &lt;capitals)
+<span class="linenr"> 2: </span>println(<span style="color: #8abeb7;">"The capital of "</span>+ country +<span style="color: #8abeb7;">" is "</span>+ city)
+<span class="linenr"> 3: </span>The capital of France is Paris
+<span class="linenr"> 4: </span>The capital of Japan is Tokyo
+<span class="linenr"> 5: </span>
+<span class="linenr"> 6: </span>scala&gt; val results = List(Some(<span style="color: #8abeb7;">"apple"</span>), None,
+<span class="linenr"> 7: </span>Some(<span style="color: #8abeb7;">"orange"</span>))
+<span class="linenr"> 8: </span>results: List[Option[java.lang.String]] = List(Some(apple),
+<span class="linenr"> 9: </span>None, Some(orange))
+<span class="linenr">10: </span>scala&gt; for (Some(fruit) &lt;results)
+<span class="linenr">11: </span>println(fruit)
+<span class="linenr">12: </span>apple
+<span class="linenr">13: </span>orange
+</pre>
+</div>
+<p>
+第2个例子，可以明显看到模式匹配的痕迹。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-0-4" class="outline-3">
+<h3 id="sec-0-4">不可变的数据结构(immutable data structure)</h3>
+<div class="outline-text-3" id="text-0-4">
+<p>
+scala提供了函数式编程语言重要的基石，那就是不可变的数据结构。并且，
+scala在java API的基础上提供了很多不可变的数据类型，如List、Tuple、Map
+和Set。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-0-5" class="outline-3">
+<h3 id="sec-0-5">引用透明性(referencially transparent)</h3>
+<div class="outline-text-3" id="text-0-5">
+<p>
+函数编程的思想还包括：方法或称函数不应该有副作用(side effects)，这些方
+法只是通过参数和返回结果与他们的环境进行交互。这样的方法称为引用透明性，
+那意味着，对于给定的输入，方法调用能用它的返回结果替换，而不会影响程序
+的语义。
+举例如下：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr"> 1: </span>def add(x: Int, y: Int): Int = {
+<span class="linenr"> 2: </span>   x + y
+<span class="linenr"> 3: </span>}
+<span class="linenr"> 4: </span>
+<span class="linenr"> 5: </span>val (a, b) = (13,14)
+<span id="coderef-add" class="coderef-off"><span class="linenr"> 6: </span>val c = add(a,b)</span>
+<span class="linenr"> 7: </span>
+<span class="linenr"> 8: </span>def add2(x: Int, y: Int): Int = {
+<span class="linenr"> 9: </span>    println(<span style="color: #8abeb7;">"a + b = "</span> + (x + y))
+<span class="linenr">10: </span>    x + y
+<span class="linenr">11: </span>}
+<span class="linenr">12: </span>
+<span id="coderef-add2" class="coderef-off"><span class="linenr">13: </span>val c = add2(a,b)</span>
+</pre>
+</div>
+<p>
+在第 <a href="#coderef-add"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-add');" onmouseout="CodeHighlightOff(this, 'coderef-add');">6</a> 行调用 add 函数调用的位置，可用 27 代替，不会影响程序的语义，
+而在 第 <a href="#coderef-add2"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-add2');" onmouseout="CodeHighlightOff(this, 'coderef-add2');">13</a> 行，如果用 27 代替 add2 函数调用，就与程序原有的语
+义不一致，因为函数add2()有副作用：打印语句。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-0-6" class="outline-3">
+<h3 id="sec-0-6">trait</h3>
+<div class="outline-text-3" id="text-0-6">
+<p>
+Scala 使用trait，使其看起来有点像多重继承，值得提到的，有如下几点，第一，
+trait像Java的接口，而它们也有方法实现，具有&lt;松本行弘的程序世界&gt;说的
+ 实现继承(另一种继承叫规格继承，如class)能力，甚至有成员变量(fields)；第二，
+不像类，trait能加新的功能到一个未确定的超类中；第三，对super的解释，多
+重继承中，被super调用的方法在调用的位置确定，但是使用trait，被调用的方
+法通过类的线性化(linearizatioin)来确定并将traits混合进类中，也即trait
+的super调用，如super.toString()，是动态绑定的，而abstract class或class
+是静态绑定的，就这个区别使能了以堆栈方式进行修改，举例如下：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr"> 1: </span>abstract class IntQueue {
+<span class="linenr"> 2: </span>  def get(): Int
+<span class="linenr"> 3: </span>  def put(x: Int)
+<span class="linenr"> 4: </span>}
+<span class="linenr"> 5: </span>
+<span class="linenr"> 6: </span>import scala.collection.mutable.ArrayBuffer
+<span class="linenr"> 7: </span>
+<span class="linenr"> 8: </span>class BasicIntQueue extends IntQueue {
+<span class="linenr"> 9: </span>  private val buf = new ArrayBuffer[Int]
+<span class="linenr">10: </span>  def get() = buf.remove(0)
+<span class="linenr">11: </span>  def put(x: Int) { buf += x }
+<span class="linenr">12: </span>}
+<span class="linenr">13: </span>
+<span class="linenr">14: </span>trait Doubling extends IntQueue {
+<span id="coderef-double" class="coderef-off"><span class="linenr">15: </span>  abstract override def put(x: Int) { super.put(2 * x) }</span>
+<span class="linenr">16: </span>}
+<span class="linenr">17: </span>
+<span class="linenr">18: </span>trait Incrementing extends IntQueue { 
+<span id="coderef-incrementing" class="coderef-off"><span class="linenr">19: </span>  abstract override def put(x: Int)</span>
+<span id="coderef-super-put" class="coderef-off"><span class="linenr">20: </span>      { super.put(x + 1) }</span>
+<span class="linenr">21: </span>}
+<span class="linenr">22: </span>
+<span class="linenr">23: </span>trait Filtering extends IntQueue {
+<span id="coderef-filtering" class="coderef-off"><span class="linenr">24: </span>  abstract override def put(x: Int) {</span>
+<span class="linenr">25: </span>    if (x &gt;= 0) super.put(x) 
+<span class="linenr">26: </span>  }
+<span class="linenr">27: </span>}
+<span class="linenr">28: </span>
+<span id="coderef-stack1" class="coderef-off"><span class="linenr">29: </span>scala&gt; val q = new BasicIntQueue with Doubling with Incrementing</span>
+<span class="linenr">30: </span>q: BasicIntQueue with Doubling with Incrementing = $anon$1@60c8fab
+<span class="linenr">31: </span>
+<span class="linenr">32: </span>scala&gt; q.put(42)
+<span class="linenr">33: </span>
+<span class="linenr">34: </span>scala&gt; q.get()
+<span class="linenr">35: </span>res12: Int = 86
+<span class="linenr">36: </span>
+<span id="coderef-stack2" class="coderef-off"><span class="linenr">37: </span>scala&gt; val q = new BasicIntQueue with Incrementing with Doubling</span>
+<span class="linenr">38: </span>q: BasicIntQueue with Incrementing with Doubling = $anon$1@2a7a3919
+<span class="linenr">39: </span>
+<span class="linenr">40: </span>scala&gt; q.put(42)
+<span class="linenr">41: </span>
+<span class="linenr">42: </span>scala&gt; q.get()
+<span class="linenr">43: </span>res14: Int = 85
+</pre>
+</div>
+<p>
+line <a href="#coderef-stack1"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-stack1');" onmouseout="CodeHighlightOff(this, 'coderef-stack1');">29</a>  和 line <a href="#coderef-stack2"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-stack2');" onmouseout="CodeHighlightOff(this, 'coderef-stack2');">37</a> 的 with Doubling with
+Incrementing 和 with Incrementing with Doubling， 顺序的不同，所产生的
+结果是不同的，明显地看到堆栈的痕迹，同时也可以理解super为什么需要动态
+绑定，如line <a href="#coderef-super-put"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-super-put');" onmouseout="CodeHighlightOff(this, 'coderef-super-put');">20</a> 的 super.put，由于自己在继承类中位置的不
+同，所使用的super肯定不同。
+</p>
+
+<p>
+另外，代码中的line <a href="#coderef-double"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-double');" onmouseout="CodeHighlightOff(this, 'coderef-double');">15</a> <a href="#coderef-incrementing"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-incrementing');" onmouseout="CodeHighlightOff(this, 'coderef-incrementing');">19</a> <a href="#coderef-filtering"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-filtering');" onmouseout="CodeHighlightOff(this, 'coderef-filtering');">24</a>
+使用了 abstract override 是专门用于修改超类中某一方法时，所必须的特定语
+法。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-0-7" class="outline-3">
+<h3 id="sec-0-7">协变和逆变</h3>
+<div class="outline-text-3" id="text-0-7">
+<p>
+引入协变、逆变和不变，主要基于Java支持协变所引起的编译时和运行时的不一
+致所带来的问题，如下的Java代码，编译时ok，但运行时出现
+ArrayStoreException。
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>// this is Java
+<span class="linenr">2: </span>String[] a1 = { <span style="color: #8abeb7;">"abc"</span> }<span style="color: #969896; font-style: italic;">;</span>
+<span class="linenr">3: </span>Object[] a2 = a1<span style="color: #969896; font-style: italic;">;</span>
+<span id="coderef-assign" class="coderef-off"><span class="linenr">4: </span>a2[0] = new Integer(17)<span style="color: #969896; font-style: italic;">;</span></span>
+</pre>
+</div>
+<p>
+在运行时，第<a href="#coderef-assign"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-assign');" onmouseout="CodeHighlightOff(this, 'coderef-assign');">4</a> 行引发如下错误:
+</p>
+<pre class="example">
+Exception in thread "main" java.lang.ArrayStoreException:
+java.lang.Integer
+at JavaArrays.main(JavaArrays.java:8)
+</pre>
+<p>
+这是因为在运行时，Java存储数组的元素类型，然后，在每次数组元素被更新时，
+将检查新元素值的存储类型，如果该值不是那个类型的实例，就会抛出
+ArrayStoreException。为了解决这样的问题，在Scala中，Array是不变的，即
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>// this is Scala
+<span class="linenr">2: </span>String[] a1 = { <span style="color: #8abeb7;">"abc"</span> }<span style="color: #969896; font-style: italic;">;</span>
+<span class="linenr">3: </span>Object[] a2 = a1<span style="color: #969896; font-style: italic;">;</span>
+</pre>
+</div>
+<p>
+上述代码，在第2行，会引起编译错误。
+</p>
+
+<ul class="org-ul">
+<li>子类型(subtype) 在需要父类型的地方，scala编译器允许将其替换为子类型
+</li>
+</ul>
+<p>
+中的任何一个。对于没有类型参数的class或trait，子类型关系与子类关系对应，
+对于有类型参数的class或trait，如果类型参数标注为协变或逆变，则按不同的
+方向形成有子类型关系，如果类型参数没有标注，则不会形成子类型关系。
+</p>
+
+<ul class="org-ul">
+<li>协变(covariant) 一个协变标注能通过下面的方式应用到class或trait的类型参
+数中，即在类型参数前面添加加号"+"。根据定义，class或traitn将根据标注
+参数的类型来确定协变意义上的子类型方向。如List类型是协变的，因
+此List[String]是List[Any]的子类型。
+</li>
+
+<li>逆变(contravariant) 一个逆变标注能通过下面的方式应用到class或trait的类型参
+数中，即在类型参数前面添加加号"+"。根据定义，class或traitn将根据标注
+参数的类型来确定逆变意义上的子类型方向。如Function1的第一个参数类型
+是逆变的，因此Function1[Any, Any]是Function1[String, Any]的子类性。
+</li>
+</ul>
+
+<p>
+逆变和协变的应用例子，在scala的实现中非常多，如Function1的定义(取自2.9.2)
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>//PartialFunction.scala version 
+<span class="linenr">2: </span>trait Function1[-A, +B] extends AnyRef {
+<span class="linenr">3: </span>   ...
+<span class="linenr">4: </span>}
+</pre>
+</div>
+<ul class="org-ul">
+<li>Function1类型参数的第参数 第一个类型为“-A”，意味着逆变，第2个为协变，
+根据定义，可以得到如下公理：
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="left">T1' &lt;: T1</th>
+</tr>
+
+<tr>
+<th scope="col" class="left">T2 &lt;: T2'</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="left">Function1[T1, T2] &lt;: Function1[T1', T2']</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+
+<p>
+Function1的参数类型定义，明确了一个规则：所有的输入都应该为负位置
+(negative positions)，所有输出为正位置(positive positions)。
+</p>
+
+<p>
+考虑含有多个case的情况，case之间必须符合先子类，后父类的原则，否则导致
+  不可达的异常情况，
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>class A
+<span class="linenr">2: </span>class B extends A
+<span class="linenr">3: </span>class C extends B
+<span class="linenr">4: </span>scala&gt; val withDefault: A =&gt; B = {
+<span class="linenr">5: </span>| case x:B =&gt; new B
+<span class="linenr">6: </span>| case x:A =&gt; new B }
+<span class="linenr">7: </span>withDefault: A =&gt; B = &lt;function1&gt;
+</pre>
+</div>
+<p>
+在上面的代码中，case x:B 一定要出现在 case x:A的前面，否则会导致不可达
+的编译错误。另外：  Function1[A,B] &lt;: Function1[B,B] 
+</p>
+
+<ul class="org-ul">
+<li>为什么设置成contravariant <sup><a id="fnr.5" name="fnr.5" class="footref" href="#fn.5">5</a></sup>
+</li>
+</ul>
+
+<p>
+假设如下继承关系：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>Animal &lt;- Duck
+<span class="linenr">2: </span>Animal &lt;- Dog
+<span class="linenr">3: </span>Duck &lt;- WhiteDuck
+<span class="linenr">4: </span>Duck &lt;- BlackDuck
+</pre>
+</div>
+<p>
+且有一个函数 <code>funcWithFuncParam(x: Duck =&gt; Int)(y: Duck)</code> 需要一个函数
+<code>Duck =&gt; Int</code> 作为它的参数，如果 <code>WhiteDuck =&gt; Int</code> 是 <code>Duck =&gt;
+Int</code> 的子类型( <code>WhiteDuck &lt;: Duck</code> )，且能够传递给该函
+数~funcWithFuncParam~，则如下代码成立:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>def funcWhiteDuck(x: WhiteDuck): Int = {8}
+<span class="linenr">2: </span>val f1 = funcWithFuncParam(funcWhiteDuck) _ 
+<span class="linenr">3: </span>f1(new WhiteDuck)
+</pre>
+</div>
+<p>
+有因为 <code>Duck =&gt; Int</code> 且 WhiteDuck 和 BlackDuck都是Duck的子类，因
+此 <code>f1(new BlackDuck)</code> 也应该可以执行，这显然是不合法的，就像 val
+x:Integet = "string" 一样不合法。当然Scala不允许出现上面的情况，因
+此， <code>Animal =&gt; Int</code> 才是 <code>Duck =&gt;Int</code> 的子类，如下代码才能在Scala中运行，并符合子类“是一“个父类的原则。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr"> 1: </span>Animal &lt;- Duck
+<span class="linenr"> 2: </span>Animal &lt;- Dog
+<span class="linenr"> 3: </span>Duck &lt;- WhiteDuck
+<span class="linenr"> 4: </span>Duck &lt;- BlackDuck
+<span class="linenr"> 5: </span>
+<span class="linenr"> 6: </span>scala&gt; def funcWithFuncParam(x: Duck =&gt; Int) (y:Duck){
+<span class="linenr"> 7: </span>     | x(y) }
+<span class="linenr"> 8: </span>funcWithFuncParam: (x: Duck =&gt; Int)(y: Duck)Unit
+<span class="linenr"> 9: </span>
+<span class="linenr">10: </span>scala&gt; def funcAnimal(x: Animal): Int = {8}
+<span class="linenr">11: </span>funcAnimal: (x: Animal)Int
+<span class="linenr">12: </span>
+<span class="linenr">13: </span>scala&gt; def funcDuck(x: Duck): Int = {8}
+<span class="linenr">14: </span>funcDuck: (x: Duck)Int
+<span class="linenr">15: </span>
+<span class="linenr">16: </span>scala&gt; def funcWhiteDuck(x: WhiteDuck): Int = {8}
+<span class="linenr">17: </span>funcWhiteDuck: (x: WhiteDuck)Int
+<span class="linenr">18: </span>
+<span class="linenr">19: </span>scala&gt; val f1 = funcWithFuncParam(funcAnimal) _
+<span class="linenr">20: </span>f1: Duck =&gt; Unit = &lt;function1&gt;
+<span class="linenr">21: </span>
+<span class="linenr">22: </span>scala&gt; f1(new Duck)
+<span class="linenr">23: </span>scala&gt; f1(new WhiteDuck)
+<span class="linenr">24: </span>scala&gt; f1(new BlackDuck)
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>下届 和 上届
+</li>
+</ul>
+
+<p>
+通过对Function1定义的分析，知道下面的定义：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span class="linenr">1: </span><span style="color: #b5bd68;">class</span> <span style="color: #81a2be;">Queue</span>[+T] 
+<span class="linenr">2: </span>{
+<span id="coderef-enqueue" class="coderef-off"><span class="linenr">3: </span>    <span style="color: #81a2be;">def</span> <span style="color: #f0c674;">enqueue</span>(x: T) = {}</span>
+<span class="linenr">4: </span>}
+</pre>
+</div>
+<p>
+第<a href="#coderef-enqueue"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-enqueue');" onmouseout="CodeHighlightOff(this, 'coderef-enqueue');">3</a>行会出现编译错误，因为函数参数是输入的一种方式，错误如下：
+</p>
+<pre class="example">
+error: covariant type T occurs in contravariant position in type T of value x
+       def enqueue(x: T) = {}
+                   ^
+</pre>
+<p>
+要解决这个问题，必须使用lower bounds技术，
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span class="linenr">1: </span><span style="color: #b5bd68;">class</span> <span style="color: #81a2be;">Queue</span>[+T] {
+<span class="linenr">2: </span>    <span style="color: #81a2be;">def</span> <span style="color: #f0c674;">enqueue</span>[U&gt;:T](x : U) = <span style="color: #b5bd68;">new</span> <span style="color: #81a2be;">Queue</span>[U]()
+<span class="linenr">3: </span>}
+<span class="linenr">4: </span>
+<span class="linenr">5: </span><span style="color: #b5bd68;">class</span> <span style="color: #81a2be;">Fruit</span>
+<span class="linenr">6: </span><span style="color: #b5bd68;">class</span> Apple <span style="color: #b5bd68;">extends</span> <span style="color: #81a2be;">Fruit</span>
+<span class="linenr">7: </span><span style="color: #b5bd68;">class</span> Orange <span style="color: #b5bd68;">extends</span> <span style="color: #81a2be;">Fruit</span>
+<span class="linenr">8: </span><span style="color: #b5bd68;">class</span> Another
+<span class="linenr">9: </span>}
+</pre>
+</div>
+<p>
+语法为 <b>U &gt;: T</b> 使得 enqueue的参数类型现在为 U，U 是 T 的超类型，保证
+不会出现运行时错误。例如上面的例子中，可以有如下使用:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span class="linenr">1: </span><span style="color: #81a2be;">val</span> <span style="color: #f0c674;">q1</span> = <span style="color: #b5bd68;">new</span> <span style="color: #81a2be;">Queue</span>[Fruit]
+<span class="linenr">2: </span>    q1.enqueue(<span style="color: #b5bd68;">new</span> <span style="color: #81a2be;">Apple</span>)
+<span id="coderef-orange" class="coderef-off"><span class="linenr">3: </span>    q1.enqueue(<span style="color: #b5bd68;">new</span> <span style="color: #81a2be;">Orange</span>)</span>
+<span id="coderef-another" class="coderef-off"><span class="linenr">4: </span>    q1.enqueue(<span style="color: #b5bd68;">new</span> <span style="color: #81a2be;">Another</span>)</span>
+</pre>
+</div>
+<p>
+第 <a href="#coderef-orange"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-orange');" onmouseout="CodeHighlightOff(this, 'coderef-orange');">3</a>, <a href="#coderef-another"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-another');" onmouseout="CodeHighlightOff(this, 'coderef-another');">4</a> 行，好像不对，经分析，Orange的超类为Fruit，
+Fruit是Fruit的超类，因此没有问题，而Another的超类为Any，Any为Fruit的超
+类，也符合条件。
+</p>
+
+<p>
+upper bounds 与下届类似，可以通过PinS page 444的一个例子：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span class="linenr">1: </span><span style="color: #81a2be;">def</span> <span style="color: #f0c674;">orderedMergeSort</span>[T &lt;: Ordered[T]](xs: List[T]): List[T] = {
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>对象私有数据
+</li>
+</ul>
+<p>
+也是通过对Function1的定义，输入输出必须遵循正负位置，因此在定义类或
+trait，不能出现公共的可修改的变量(使用var定义的变量)，它会引起使用者的
+非法修改。如需要定义这样的变量，必须像如下一样定义：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span class="linenr">1: </span><span style="color: #b5bd68;">class</span> <span style="color: #81a2be;">Queue</span>[+T] <span style="color: #b5bd68;">private</span> (
+<span class="linenr">2: </span><span style="color: #b5bd68;">private</span>[<span style="color: #b5bd68;">this</span>] var leading: List[T],
+<span class="linenr">3: </span><span style="color: #b5bd68;">private</span>[<span style="color: #b5bd68;">this</span>] var trailing: List[T]
+<span class="linenr">4: </span>) {}
+</pre>
+</div>
+<p>
+使用了关键字 <b>private[this]</b> 。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-0-8" class="outline-3">
+<h3 id="sec-0-8">部分应用函数</h3>
+<div class="outline-text-3" id="text-0-8">
+<p>
+部分应用函数(Partially Applied function) 一个用在表达式中且缺少一些参
+数的函数，定义部分应用函数时，使用下划杠来完成。如一个函数f的类型为Int =&gt; Int =&gt; Int，那么 f 和 f(1) 是部分
+应用函数。
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr"> 1: </span>scala&gt; def sum(x: Int, y: Int, z: Int) = x + y + z
+<span class="linenr"> 2: </span>sum: (x: Int, y: Int, z: Int)Int
+<span class="linenr"> 3: </span>
+<span class="linenr"> 4: </span>scala&gt; val a = sum(2,_:Int,3)
+<span class="linenr"> 5: </span>a: Int =&gt; Int = &lt;function1&gt;
+<span class="linenr"> 6: </span>
+<span class="linenr"> 7: </span>scala&gt; val b = sum(2,_:Int,_:Int)
+<span class="linenr"> 8: </span>a: (Int, Int) =&gt; Int = &lt;function2&gt;
+<span class="linenr"> 9: </span>
+<span class="linenr">10: </span>scala&gt; val c = sum _
+<span class="linenr">11: </span>c: (Int, Int, Int) =&gt; Int = &lt;function3&gt;
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">不同于Java的特点</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1">object关键字</h3>
+<div class="outline-text-3" id="text-1-1">
+<ul class="org-ul">
+<li>singleton object
+</li>
+</ul>
+<p>
+用object关键字定义的对象，称为singleton对象。每个singleton object有且
+只有一个实例。一个singleton object 与一个class拥有同样的名字，并且被定
+义在同一个源文件中，称为那个class的同伴对象(companion object)。这个
+class称为它的同伴类。一个没有同伴类的singleton object称为standalone
+object。
+</p>
+
+<p>
+与singleton object相关的是，在scala中没有静态成员。
+</p>
+</div>
+</div>
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2">by-name 参数</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+是call-by-name的同义词，是一种求值策略，即函数的参数在函数被调用前并不
+求值，而是将整个参数代入进函数体中，如果参数x = function(5,6)，则整个
+代入，无论什么时候出现在函数中，都会对其进行重新求值。通过两个例子来说
+明其用途：
+示例一
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span id="coderef-func" class="coderef-off"><span class="linenr"> 1: </span>def myAssert(predicate: () =&gt; Boolean) =</span>
+<span class="linenr"> 2: </span>if (assertionsEnabled <span style="color: #81a2be;">&amp;&amp;</span> !predicate())
+<span class="linenr"> 3: </span>throw new AssertionError
+<span class="linenr"> 4: </span>
+<span class="linenr"> 5: </span>myAssert(() =&gt; 5 &gt; 3)
+<span class="linenr"> 6: </span>
+<span class="linenr"> 7: </span>var assertionsEnabled = true
+<span id="coderef-name" class="coderef-off"><span class="linenr"> 8: </span>def byNameAssert(predicate: =&gt; Boolean) =</span>
+<span id="coderef-aname" class="coderef-off"><span class="linenr"> 9: </span>if (assertionsEnabled <span style="color: #81a2be;">&amp;&amp;</span> !predicate)</span>
+<span class="linenr">10: </span>throw new AssertionError
+<span class="linenr">11: </span>
+<span class="linenr">12: </span>myAssert(5 &gt; 3)
+<span class="linenr">13: </span>
+<span id="coderef-value" class="coderef-off"><span class="linenr">14: </span>def boolAssert(predicate: Boolean) =</span>
+<span id="coderef-avalue" class="coderef-off"><span class="linenr">15: </span>if (assertionsEnabled <span style="color: #81a2be;">&amp;&amp;</span> !predicate)</span>
+<span class="linenr">16: </span>throw new AssertionError
+<span class="linenr">17: </span>
+<span class="linenr">18: </span>myAssert(5 &gt; 3)
+</pre>
+</div>
+<p>
+说明: 要使用by-name参数，必须将line <a href="#coderef-func"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-func');" onmouseout="CodeHighlightOff(this, 'coderef-func');">1</a> 的 "() =&gt;" 变成
+<a href="#coderef-name"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-name');" onmouseout="CodeHighlightOff(this, 'coderef-name');">8</a> 的 "=&gt;"，前面是函数作为参数，后面是by-name参数
+</p>
+
+<p>
+现在比较line <a href="#coderef-name"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-name');" onmouseout="CodeHighlightOff(this, 'coderef-name');">8</a> 和 <a href="#coderef-value"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-value');" onmouseout="CodeHighlightOff(this, 'coderef-value');">14</a>，<a href="#coderef-avalue"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-avalue');" onmouseout="CodeHighlightOff(this, 'coderef-avalue');">15</a> 的 predicate，不管assertionsEnabled为
+true还是false，在执行myAssert()之前就执行了predicate的计算，但是line
+<a href="#coderef-aname"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-aname');" onmouseout="CodeHighlightOff(this, 'coderef-aname');">9</a> 则不会这样，它只在false的情况下，去执行predicate的求值，因
+此是惰性求值的体现。所以boolAssert()函数是有副作用的。
+</p>
+
+<p>
+示例2：
+一个通常的producer/consumer并发程序的缓冲区Drop的代码，producer将消息
+通过Drop.put()存入，consumer通过Drop.take()取出，具体的缓冲区为一个字
+符串变量message，为了并发带来的重复存入或取空，使用同步机制，将message
+存入和取出过程进行同步锁。来看Java和scala代码，可以带来怎么
+的区别。(代码来自<sup><a id="fnr.6" name="fnr.6" class="footref" href="#fn.6">6</a></sup>,为节省空间，删除了些注释和代码)
+Java:
+</p>
+<pre class="example">
+<span class="linenr"> 1: </span>class Drop 
+<span class="linenr"> 2: </span>{ 
+<span class="linenr"> 3: </span> private String message; 
+<span class="linenr"> 4: </span> private boolean empty = true; 
+<span class="linenr"> 5: </span>
+<span class="linenr"> 6: </span> private Object lock = new Object(); 
+<span class="linenr"> 7: </span>
+<span class="linenr"> 8: </span> public String take() 
+<span class="linenr"> 9: </span> { 
+<span class="linenr">10: </span>   synchronized(lock) 
+<span class="linenr">11: </span>   { 
+<span class="linenr">12: </span>     //Wait until message is available. 
+<span id="coderef-take" class="coderef-off"><span class="linenr">13: </span>     while (empty)</span>
+<span class="linenr">14: </span>     { 
+<span class="linenr">15: </span>       try 
+<span class="linenr">16: </span>       { 
+<span class="linenr">17: </span>         lock.wait(); 
+<span class="linenr">18: </span>       } 
+<span class="linenr">19: </span>       catch (InterruptedException e) {} 
+<span class="linenr">20: </span>     } 
+<span class="linenr">21: </span>     //Toggle status. 
+<span class="linenr">22: </span>     empty = true; 
+<span class="linenr">23: </span>     //Notify producer that status has changed. 
+<span class="linenr">24: </span>     lock.notifyAll(); 
+<span class="linenr">25: </span>     return message; 
+<span class="linenr">26: </span>   } 
+<span class="linenr">27: </span> } 
+<span class="linenr">28: </span>
+<span class="linenr">29: </span> public void put(String message) 
+<span class="linenr">30: </span> { 
+<span class="linenr">31: </span>   synchronized(lock) 
+<span class="linenr">32: </span>   { 
+<span class="linenr">33: </span>     //Wait until message has been retrieved. 
+<span id="coderef-put" class="coderef-off"><span class="linenr">34: </span>     while (!empty)</span>
+<span class="linenr">35: </span>       { 
+<span class="linenr">36: </span>         lock.wait(); 
+<span class="linenr">37: </span>       } catch (InterruptedException e) {} 
+<span class="linenr">38: </span>     } 
+<span class="linenr">39: </span>     //Toggle status. 
+<span class="linenr">40: </span>     empty = false; 
+<span class="linenr">41: </span>     //Store message. 
+<span class="linenr">42: </span>     this.message = message; 
+<span class="linenr">43: </span>     //Notify consumer that status has changed. 
+<span class="linenr">44: </span>     lock.notifyAll(); 
+<span class="linenr">45: </span>   } 
+<span class="linenr">46: </span> } 
+<span class="linenr">47: </span>}
+</pre>
+<p>
+Scala:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr"> 1: </span>class Drop 
+<span class="linenr"> 2: </span>{ 
+<span class="linenr"> 3: </span>  var message : String = <span style="color: #8abeb7;">""</span>
+<span class="linenr"> 4: </span>  var empty : Boolean = true 
+<span class="linenr"> 5: </span>  var lock : AnyRef = new Object() 
+<span class="linenr"> 6: </span>
+<span class="linenr"> 7: </span>  def put(x: String) : Unit = 
+<span class="linenr"> 8: </span>    lock.synchronized 
+<span class="linenr"> 9: </span>    { 
+<span class="linenr">10: </span>      // Wait until message has been retrieved 
+<span id="coderef-put-wait" class="coderef-off"><span class="linenr">11: </span>      await (empty == true)</span>
+<span class="linenr">12: </span>      // Toggle status 
+<span class="linenr">13: </span>      empty = false 
+<span class="linenr">14: </span>      // Store message 
+<span class="linenr">15: </span>      message = x 
+<span class="linenr">16: </span>      // Notify consumer that status has changed 
+<span class="linenr">17: </span>      lock.notifyAll() 
+<span class="linenr">18: </span>    } 
+<span class="linenr">19: </span>
+<span class="linenr">20: </span>  def take() : String = 
+<span class="linenr">21: </span>    lock.synchronized 
+<span class="linenr">22: </span>    { 
+<span class="linenr">23: </span>      // Wait until message is available. 
+<span id="coderef-take-wait" class="coderef-off"><span class="linenr">24: </span>      await (empty == false)</span>
+<span class="linenr">25: </span>      // Toggle status 
+<span class="linenr">26: </span>      empty=true 
+<span class="linenr">27: </span>      // Notify producer that staus has changed 
+<span class="linenr">28: </span>      lock.notifyAll() 
+<span class="linenr">29: </span>      // Return the message 
+<span class="linenr">30: </span>      message 
+<span class="linenr">31: </span>    } 
+<span class="linenr">32: </span>
+<span class="linenr">33: </span>  private def await(cond: =&gt; Boolean) = 
+<span id="coderef-await" class="coderef-off"><span class="linenr">34: </span>    while (!cond) { lock.wait() }</span>
+<span class="linenr">35: </span>}
+</pre>
+</div>
+<p>
+对Java代码进行观察，发现有两段非常相似的代码分别在line <a href="#coderef-take"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-take');" onmouseout="CodeHighlightOff(this, 'coderef-take');">13</a> 和
+<a href="#coderef-put"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-put');" onmouseout="CodeHighlightOff(this, 'coderef-put');">34</a> 开始的while循环中，都是通过观察tempty的值来决定是否需要wait，
+并且条件刚好相反，并且每次循环都需要对empty进行重新求值，所以没有办法
+将这两段代码封装成一个函数。而Scala的代码，则可以做到这一点，理由是
+scala实现了call-by-name，line <a href="#coderef-put-wait"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-put-wait');" onmouseout="CodeHighlightOff(this, 'coderef-put-wait');">11</a> 和 <a href="#coderef-take-wait"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-take-wait');" onmouseout="CodeHighlightOff(this, 'coderef-take-wait');">24</a> 传进去
+的比较表达式，只有在 line <a href="#coderef-await"class="coderef" onmouseover="CodeHighlightOn(this, 'coderef-await');" onmouseout="CodeHighlightOff(this, 'coderef-await');">34</a> 的每次循环开始之前，才会对empty
+进行求值，正是这个每次求值empty，决定了这段代码的重用。如果将await函数
+改为：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-emacs-lisp"><span class="linenr">1: </span>private def await(cond: Boolean) = 
+<span class="linenr">2: </span>  while (!cond) { lock.wait() }
+</pre>
+</div>
+<p>
+情况就不一样了，while循环的条件变成了固定值，要么永远为真，要么永远为
+假，无法达到预期的效果。
+</p>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p class="footpara">
+<a href="http://spark.apache.org/">http://spark.apache.org/</a>
+</p></div>
+
+<div class="footdef"><sup><a id="fn.2" name="fn.2" class="footnum" href="#fnr.2">2</a></sup> <p class="footpara">
+Programming in Scala, 2nd Edition by Martin Odersky, Lex Spoon,
+and Bill Venners
+</p></div>
+
+<div class="footdef"><sup><a id="fn.3" name="fn.3" class="footnum" href="#fnr.3">3</a></sup> <p class="footpara">
+模式匹配是检查被测标记序列是否出现在模式的某一部分中。
+</p></div>
+
+<div class="footdef"><sup><a id="fn.4" name="fn.4" class="footnum" href="#fnr.4">4</a></sup> <p class="footpara">
+Pattern Matching in Scala Michael Ruegg 2009
+</p></div>
+
+<div class="footdef"><sup><a id="fn.5" name="fn.5" class="footnum" href="#fnr.5">5</a></sup> <p class="footpara">
+<a href="http://stackoverflow.com/q/23308555/1054800">http://stackoverflow.com/q/23308555/1054800</a>
+</p>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-0-1">case classes</a></li>
+<li><a href="#sec-0-2">模式匹配</a></li>
+<li><a href="#sec-0-3">模式匹配的用例</a></li>
+<li><a href="#sec-0-4">不可变的数据结构(immutable data structure)</a></li>
+<li><a href="#sec-0-5">引用透明性(referencially transparent)</a></li>
+<li><a href="#sec-0-6">trait</a></li>
+<li><a href="#sec-0-7">协变和逆变</a></li>
+<li><a href="#sec-0-8">部分应用函数</a></li>
+</ul>
+</li>
+<li><a href="#sec-1">不同于Java的特点</a>
+<ul>
+<li><a href="#sec-1-1">object关键字</a></li>
+<li><a href="#sec-1-2">by-name 参数</a></li>
+</ul>
+</div>
+</div></div>
+
+<div class="footdef"><sup><a id="fn.6" name="fn.6" class="footnum" href="#fnr.6">6</a></sup> <p class="footpara">
+<a href="http://www.ibm.com/developerworks/cn/java/j-scala02049.html">http://www.ibm.com/developerworks/cn/java/j-scala02049.html</a>
+</p></div>
+
+
+</div>
+</div>

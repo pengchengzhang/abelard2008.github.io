@@ -1,0 +1,144 @@
+---
+layout: post
+title: "Alogorithms studying"
+tagline: "Algorithms"
+description: "study some important algorithms"
+tags: ["computing theory"]
+---
+{% include JB/setup %}
+
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">Hash</a></li>
+<li><a href="#sec-2">two types of popular hash functions</a></li>
+<li><a href="#sec-3">Linear Hashing</a></li>
+<li><a href="#sec-4">how to write a good hashcode()</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Hash</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Hash is a technique which addresses records provided with an
+identifier called primary key, or simply key.
+</p>
+
+<p>
+If two conditions hold, a hash table supports constant expected-time
+element access: the elements must be relatively evenly distributed
+among the slots, and the number of slots must vary in direct
+proportion to the number of elements.
+</p>
+
+<p>
+Given a good hashing function, presering constant-time access to
+elements requires keeping hash chains short. Keeping chains short
+without wasting space requires adjusting the number of slots as the
+number of elements changes.<sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup>
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">two types of popular hash functions</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+division method
+</p>
+
+<p>
+h(k) = k mod M, where M is prime
+</p>
+
+<p>
+multiplication method
+</p>
+
+<p>
+h(k) = &lfloor; m (k A mod 1) &rfloor; <sup><a id="fnr.1.100" name="fnr.1.100" class="footref" href="#fn.1">1</a></sup>, where A is in the range 0 &lt; A &lt; 1, kA mod 1
+is the fraction of the kA, in general, A is 0.6180339887 <sup><a id="fnr.2" name="fnr.2" class="footref" href="#fn.2">2</a></sup>
+</p>
+
+<p>
+2<sup>p</sup>
+An advantage of the multiplication method is that the value of m is not critical.
+We typically choose it to be a power of 2 (m = 2<sup>p</sup> for some integer p), since we
+can then easily implement the function on most computers as follows. Suppose
+that the word size of the machine is w bits and that k fits into a single word. We
+restrict A to be a fraction of the form s=2<sup>w</sup>, where s is an integer in the range
+0 &lt; s &lt; 2<sup>w</sup>. we first multiply k by the w-bit integer s = A * 2<sup>w</sup>. The
+result is a 2w-bit value r<sub>1</sub> * 2<sup>w</sup> + r<sub>0</sub>, where r<sub>1</sub> is the high-order
+word of the product and r<sub>0</sub> is the low-order word of the product. The desired p-bit hash
+value consists of the p most significant bits of r<sub>0</sub>. <sup><a id="fnr.1.100" name="fnr.1.100" class="footref" href="#fn.1">1</a></sup>
+</p>
+
+<p>
+why r<sub>1</sub> * 2<sup>w</sup> + r<sub>0</sub> is equal to &lfloor; M (kA mod 1) &rfloor;, the reasoning steps is
+as follows: 
+</p>
+
+<p>
+&lfloor; m ( kA mod 1) &rfloor; &hArr;  &lfloor; m \(\frac{k * s}{2^w}\)  mod 1 ] &rfloor; &hArr;
+</p>
+
+<p>
+&lfloor; m (\(\frac{k * s}{2^w}\) mod 1) &rfloor; &hArr; &lfloor; m (\(\frac{ r_1 * 2^w+ r_0}{2^w}\)
+mod 1) &rfloor; , where k * s can be equal to r<sub>1</sub> * 2<sup>w</sup> + r<sub>0</sub>, and 
+</p>
+
+<p>
+\(\frac{r_0 * 2^w + r_1}{2^w}\) mod 1 &hArr; r<sub>1</sub> + \(\frac{r_0}{2^w} \)
+</p>
+
+<p>
+=&gt; \(\frac{r_1}{2^w}\) &hArr; fraction of kA  
+</p>
+
+<p>
+=&gt; h(k) = &lfloor; m \(\frac{r_0}{2^w}\) &rfloor; = &lfloor; 2<sup>p</sup> \(\frac{r_0}{2^w}\) &rfloor;
+</p>
+
+<p>
+and because X * 2<sup>p</sup> is X left shift p-bits and X / 2<sup>p</sup> is right shift
+p-bits, so that &lfloor; 2<sup>p</sup> \(\frac{r_0}{2^w}\) &rfloor; &hArr; &lfloor; \( \frac{r_0}{2^{w-p} \) &rfloor;, which
+is said that h(k) is p most significant bits of r<sub>0</sub>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3">Linear Hashing</h2>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4">how to write a good hashcode()</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+in Effective Java, Item 9: Always override hashCode when you override
+equals .
+</p>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p class="footpara">
+ALGORITHMS INTRODUCTION TO THIRD EDITION THOMAS H.CHARLES E.RONALD L.CLIFFORD STEIN RIVEST
+LEISERSON CORMEN 3rd Edition p264 
+</p></div>
+
+<div class="footdef"><sup><a id="fn.2" name="fn.2" class="footnum" href="#fnr.2">2</a></sup> <p class="footpara">
+The Art of Computer Programming Vol3, Section 6.4
+</p></div>
+
+
+</div>
+</div>
