@@ -1,0 +1,114 @@
+---
+category: computer science and enginneering
+layout: post
+title: "storm 0.9.0-wip16: compile "
+tags: ["Big data", "Storm"]
+---
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">从源代码编译storm</h2>
+<div class="outline-text-2" id="text-1">
+<ul class="org-ul">
+<li>在使用git clone 版本 0.9.0-wip16的storm
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-sh">[abelard@abelard storm-source3]$ git clone https://github.com/nathanmarz/storm.git
+
+<span style="color: #b294bb;">cd</span> storm
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>执行lein compile
+</li>
+</ul>
+<hr  />
+<ol class="org-ol">
+<li>第一个错误 
+
+<p>
+Exception in thread "main" java.lang.ClassNotFoundException: backtype.storm.LocalDRPC, compiling:(testing.clj:1)
+</p>
+</li>
+</ol>
+
+
+<p>
+解答： 将storm.trident.testing ns
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java">(<span style="color: #81a2be;">ns</span> storm.trident.<span style="color: #f0c674;">testing</span>
+(:<span style="color: #b5bd68;">import</span> [storm.trident.testing FeederBatchSpout FeederCommitterBatchSpout MemoryMapState MemoryMapState$Factory TuplifyArgs])
+(:<span style="color: #b5bd68;">import</span> [backtype.storm LocalDRPC])
+(:<span style="color: #b5bd68;">import</span> [backtype.storm.tuple Fields])
+(:<span style="color: #b5bd68;">import</span> [backtype.storm.generated KillOptions])
+(:require [backtype.storm [testing :as t]])
+(:use [backtype.storm util])
+)
+</pre>
+</div>
+
+<p>
+改为：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java">(<span style="color: #81a2be;">ns</span> storm.trident.<span style="color: #f0c674;">testing</span>
+(:require [<span style="color: #81a2be;">backtype</span>.<span style="color: #81a2be;">storm</span>.LocalDRPC])
+(:<span style="color: #b5bd68;">import</span> [storm.trident.testing FeederBatchSpout FeederCommitterBatchSpout MemoryMapState MemoryMapState$Factory TuplifyArgs])
+(:<span style="color: #b5bd68;">import</span> [backtype.storm LocalDRPC])
+(:<span style="color: #b5bd68;">import</span> [backtype.storm.tuple Fields])
+(:<span style="color: #b5bd68;">import</span> [backtype.storm.generated KillOptions])
+(:require [backtype.storm [testing :as t]])
+(:use [backtype.storm util])
+)
+</pre>
+</div>
+
+
+
+<ul class="org-ul">
+<li>lein install
+</li>
+</ul>
+<p>
+将storm打包后的jar文件安装到用户主目录(ex.,/home/abelard/)的.m2（mvn的
+目录）下。
+</p>
+
+<p>
+运行storm-starter的local mode
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">lein run -m storm.starter.WordCountTopology
+</pre>
+</div>
+
+
+
+<ul class="org-ul">
+<li>运行storm-starter的distributed mode
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b294bb;">cd</span> storm-starter
+lein clean;lein deps;lein compile;lein uberjar
+storm jar target/storm-starter-0.0.1-SNAPSHOT-standalone.jar    storm.starter.ExclamationTopology exclamation-topology
+</pre>
+</div>
+
+
+<ul class="org-ul">
+<li>可能的错误
+</li>
+</ul>
+<p>
+提示storm包重复，是因为project.clj文件写的不对，所以, *uberjar*将storm包，也打入到storm-starter-0.0.1-SNAPSHOT-standalone.jar中了。
+</p>
+</div>
+</div>

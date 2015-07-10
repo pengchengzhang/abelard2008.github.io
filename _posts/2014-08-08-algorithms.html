@@ -1,26 +1,15 @@
 ---
+category: computer science and enginneering
 layout: post
-title: "Alogorithms studying"
-tagline: "Algorithms"
+title: "Alogorithms"
 description: "study some important algorithms"
-tags: ["computing theory"]
+tags: ["computing theory", alogorithms, "data structure"]
 ---
 {% include JB/setup %}
 
 <script type="text/javascript"
   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
-<div id="table-of-contents">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents">
-<ul>
-<li><a href="#sec-1">Hash</a></li>
-<li><a href="#sec-2">two types of popular hash functions</a></li>
-<li><a href="#sec-3">Linear Hashing</a></li>
-<li><a href="#sec-4">how to write a good hashcode()</a></li>
-</ul>
-</div>
-</div>
 
 <div id="outline-container-sec-1" class="outline-2">
 <h2 id="sec-1">Hash</h2>
@@ -49,17 +38,19 @@ number of elements changes.<sup><a id="fnr.1" name="fnr.1" class="footref" href=
 <div id="outline-container-sec-2" class="outline-2">
 <h2 id="sec-2">two types of popular hash functions</h2>
 <div class="outline-text-2" id="text-2">
-<p>
-division method
-</p>
+<ul class="org-ul">
+<li>division method
+</li>
+</ul>
 
 <p>
 h(k) = k mod M, where M is prime
 </p>
 
-<p>
-multiplication method
-</p>
+<ul class="org-ul">
+<li>multiplication method
+</li>
+</ul>
 
 <p>
 h(k) = &lfloor; m (k A mod 1) &rfloor; <sup><a id="fnr.1.100" name="fnr.1.100" class="footref" href="#fn.1">1</a></sup>, where A is in the range 0 &lt; A &lt; 1, kA mod 1
@@ -67,7 +58,6 @@ is the fraction of the kA, in general, A is 0.6180339887 <sup><a id="fnr.2" name
 </p>
 
 <p>
-2<sup>p</sup>
 An advantage of the multiplication method is that the value of m is not critical.
 We typically choose it to be a power of 2 (m = 2<sup>p</sup> for some integer p), since we
 can then easily implement the function on most computers as follows. Suppose
@@ -85,29 +75,29 @@ as follows:
 </p>
 
 <p>
-&lfloor; m ( kA mod 1) &rfloor; &hArr;  &lfloor; m \(\frac{k * s}{2^w}\)  mod 1 ] &rfloor; &hArr;
+&lfloor; m ( kA mod 1) &rfloor; &hArr;  &lfloor; m \(\frac{k * s}{2^{w}}\)  mod 1 ] &rfloor; &hArr;
 </p>
 
 <p>
-&lfloor; m (\(\frac{k * s}{2^w}\) mod 1) &rfloor; &hArr; &lfloor; m (\(\frac{ r_1 * 2^w+ r_0}{2^w}\)
+&lfloor; m (\(\frac{k * s}{2^{w}}\) mod 1) &rfloor; &hArr; &lfloor; m (\(\frac{ r_{1} * 2^{w}+ r_{0}}{2^{w}}\)
 mod 1) &rfloor; , where k * s can be equal to r<sub>1</sub> * 2<sup>w</sup> + r<sub>0</sub>, and 
 </p>
 
 <p>
-\(\frac{r_0 * 2^w + r_1}{2^w}\) mod 1 &hArr; r<sub>1</sub> + \(\frac{r_0}{2^w} \)
+\(\frac{r_{0} * 2^{w} + r_{1}}{2^{w}}\) mod 1 &hArr; r<sub>1</sub> + \(\frac{r_{0}}{2^{w}} \)
 </p>
 
 <p>
-=&gt; \(\frac{r_1}{2^w}\) &hArr; fraction of kA  
+=&gt; \(\frac{r_{1}}{2^{w}}\) &hArr; fraction of kA  
 </p>
 
 <p>
-=&gt; h(k) = &lfloor; m \(\frac{r_0}{2^w}\) &rfloor; = &lfloor; 2<sup>p</sup> \(\frac{r_0}{2^w}\) &rfloor;
+=&gt; h(k) = &lfloor; m \(\frac{r_{0}}{2^{w}}\) &rfloor; = &lfloor; 2<sup>p</sup> \(\frac{r_{0}}{2^{w}}\) &rfloor;
 </p>
 
 <p>
 and because X * 2<sup>p</sup> is X left shift p-bits and X / 2<sup>p</sup> is right shift
-p-bits, so that &lfloor; 2<sup>p</sup> \(\frac{r_0}{2^w}\) &rfloor; &hArr; &lfloor; \( \frac{r_0}{2^{w-p} \) &rfloor;, which
+p-bits, so that &lfloor; 2<sup>p</sup> \(\frac{r_{0}}{2^{w}}\) &rfloor; &hArr; &lfloor; \( \frac{r_{0}}{2^{w-p} \) &rfloor;, which
 is said that h(k) is p most significant bits of r<sub>0</sub>.
 </p>
 </div>
@@ -121,7 +111,7 @@ is said that h(k) is p most significant bits of r<sub>0</sub>.
 <h2 id="sec-4">how to write a good hashcode()</h2>
 <div class="outline-text-2" id="text-4">
 <p>
-in Effective Java, Item 9: Always override hashCode when you override
+In Effective Java, Item 9: Always override hashCode when you override
 equals .
 </p>
 </div>

@@ -1,0 +1,254 @@
+---
+category: computer science and enginneering
+layout: post
+title: "Joy of Clojure"
+tags: [Language, Clojure]
+---
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">如何在repl中运行第10.2中的例子</h2>
+<div class="outline-text-2" id="text-1">
+<hr  />
+
+<ul class="org-ul">
+<li>目录情况
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="src src-sh">[abelard@abelard src]$ tree
+
+<span style="color: #b294bb;">.</span>
+<span style="color: #b294bb;">`-- joy</span>
+<span style="color: #b294bb;">        |-- gui</span>
+<span style="color: #b294bb;">        |   |-- DynaFrame.clj</span>
+<span style="color: #b294bb;">        |   `</span>-- socks.clj
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>CLASSPATH现在并不包括DynaFrame.clj相关的目录
+</li>
+</ul>
+
+
+<ul class="org-ul">
+<li>按照p213，在目录
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-sh">[abelard@abelard gui]$ pwd
+
+/study/clojure/joyofclojure/src/joy/gui
+
+[abelard@abelard gui]$
+</pre>
+</div>
+<p>
+执行
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">[abelard@abelard gui]$ lein repl
+nREPL server started on port 43985
+REPL-y 0.1.9
+Clojure 1.4.0
+        Exit: Control+D or (<span style="color: #b5bd68;">exit</span>) or (quit)
+        Commands: (user/help)
+        Docs: (doc function-name-here)
+        (find-doc <span style="color: #8abeb7;">"part-of-name-here"</span>)
+        Source: (<span style="color: #b294bb;">source</span> function-name-here)
+                (user/sourcery function-name-here)
+                Javadoc: (javadoc java-object-or-class-here)
+        Examples from clojuredocs.org: [clojuredocs or cdoc]
+                        (user/clojuredocs name-here)
+                        (user/clojuredocs <span style="color: #8abeb7;">"ns-here"</span> <span style="color: #8abeb7;">"name-here"</span>)
+                <span style="color: #f0c674;">user</span>=&gt; &#65288;compile <span style="color: #8abeb7;">'joy.gui.DynaFrame)</span>
+</pre>
+</div>
+<p>
+得到如下错误：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">FileNotFoundException Could not locate joy/gui/DynaFrame__init.class or joy/gui/DynaFrame.clj on classpath:   clojure.lang.RT.load (RT.java:432)
+</pre>
+</div>
+<p>
+解决办法：
+</p>
+
+<ol class="org-ol">
+<li>退出repl并执行如下命令
+</li>
+</ol>
+<div class="org-src-container">
+
+<pre class="src src-sh">[abelard@abelard gui]$ mkdir classes
+
+[abelard@abelard gui]$ export <span style="color: #f0c674;">CLASSPATH</span>=$<span style="color: #f0c674;">CLASSPATH</span>:/study/clojure/joyofclojure/src/joy/gui/classes:/study/clojure/joyofclojure/src/joy/gui/classes
+</pre>
+</div>
+<p>
+而后，按书上的执行：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #f0c674;">user</span>=&gt; (compile <span style="color: #8abeb7;">'joy.gui.DynaFrame)</span>
+<span style="color: #8abeb7;">joy.gui.DynaFrame</span>
+<span style="color: #8abeb7;">user=&gt; (joy.gui.DynaFrame. "1st")</span>
+<span style="color: #8abeb7;">UnsupportedOperationException joy.gui.DynaFrame/df-init</span>
+<span style="color: #8abeb7;">not defined  joy.gui.DynaFrame.&lt;init&gt; (:-1)</span>
+</pre>
+</div>
+<p>
+得到了和书上一致的效果。
+</p>
+
+<ol class="org-ol">
+<li>可能出现的问题
+</li>
+</ol>
+<p>
+如果不创建classes目录，得到如下错误
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">CompilerException java.io.IOException: No such file or directory, compiling:(joy/gui/DynaFrame.clj:2)
+</pre>
+</div>
+<p>
+如果不将classes目录添加到CLASSPATH中，(joy.gui.DynaFrame "1st")将得到如下错误
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">CompilerException java.lang.ClassNotFoundException: joy.gui.DynaFrame, compiling:(NO_SOURCE_PATH:1)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Macros</h2>
+<div class="outline-text-2" id="text-2">
+<hr  />
+
+<ul class="org-ul">
+<li>设置局部标识符方法
+</li>
+</ul>
+<p>
+为了创建唯一的本地名字，Clojure提供了一个reader form。在一个使用语法引号(syntax-quote)括起来的form内，你能添加一个#号到非限定名(unqualified name)后，这样，Cojure将创建一个自动生成的标识符内，或说auto-gensym: 在名字上带有下划杠和唯一ID的标
+识符。举例如下：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">    user&gt; (defmacro local-name []
+            <span style="color: #b294bb;">`(let [name# 50]</span>
+<span style="color: #b294bb;">                    (prn name#)))</span>
+<span style="color: #b294bb;">            # 'user/local-name</span>
+<span style="color: #b294bb;">    user&gt; (macroexpand '(local-name))</span>
+<span style="color: #b294bb;">            (let* [name__5179__auto__ 50] (clojure.core/prn name__5179__auto__))</span>
+<span style="color: #b294bb;">    user&gt; (local-name)</span>
+<span style="color: #b294bb;">            50</span>
+<span style="color: #b294bb;">            nil</span>
+<span style="color: #b294bb;">user&gt;</span>
+</pre>
+</div>
+<ul class="org-ul">
+<li>~'
+</li>
+</ul>
+<p>
+在标识符前面添加 ~' 能达到相同的效果，但是不能保证在命名空间中唯一。举例如下：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">    user&gt; (defmacro local-name []
+            <span style="color: #b294bb;">`(let [~'int 50]</span>
+<span style="color: #b294bb;">                    (prn ~'int)))</span>
+<span style="color: #b294bb;">#'user/local-name</span>
+<span style="color: #b294bb;">    user&gt; (macroexpand '(local-name))</span>
+<span style="color: #b294bb;">            (let* [int 50] (clojure.core/prn int))</span>
+<span style="color: #b294bb;">                    user&gt; (macroexpand '(local-name))</span>
+<span style="color: #b294bb;">                            (let* [int 50] (clojure.core/prn int))</span>
+</pre>
+</div>
+<ul class="org-ul">
+<li>用宏来返回函数
+</li>
+</ul>
+<p>
+先来看一个有let构造的函数：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">    user&gt; (<span style="color: #b294bb;">let</span> [x (fn [conf] (println <span style="color: #8abeb7;">"Starting supervisor"</span> conf))] (defn mk-sup [&amp; args] (apply x args)))
+<span style="color: #969896; font-style: italic;">#</span><span style="color: #969896; font-style: italic;">'user/mk-sup</span>
+</pre>
+</div>
+<p>
+从结果可以看出生成了一个mk-sup函数，当然就可以使用这个函数：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">user&gt; (mk-sup 90)
+Starting supervisor 90
+nil
+user&gt; (mk-sup)
+ArityException Wrong number of args (0) passed to:
+user$<span style="color: #f0c674;">eval1287</span>$<span style="color: #f0c674;">x</span>  clojure.lang.AFn.throwArity
+(AFn.java:437)
+</pre>
+</div>
+<p>
+需要解释的是，第二次没有使用参数调用时，提示输入参数错误，因为x所定义的匿名函数带有一个参数，并且这个参数的输入由调用mk-sup函数时提供。
+</p>
+
+<ul class="org-ul">
+<li>另一种对let的使用
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="src src-sh">user&gt; ((<span style="color: #b294bb;">let</span> [x (fn [conf] (println <span style="color: #8abeb7;">"Starting supervisor"</span> conf))] (defn mk-sup [&amp; args] (apply x args))) 90)
+        Starting supervisor 90
+</pre>
+</div>
+<p>
+这样的定义是没有必要的，但是，对它的理解非常重要，因为它可以用来定义能够生产函数的宏：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">user&gt; (defmacro product-func [name &amp; body] <span style="color: #b294bb;">`(let [x# (fn ~@body)] (defn ~name [&amp; args#] (apply x# args#))))</span>
+<span style="color: #b294bb;">user&gt; (product-func mk-sup [x &amp;] (println "Starting     supervisor" x))</span>
+<span style="color: #b294bb;">user&gt; (mk-sup 8)</span>
+<span style="color: #b294bb;">Starting supervisor 8</span>
+</pre>
+</div>
+<p>
+这里：(1) 定义一个宏 product-func (2) 用宏product-func来定义一个函数mk-sup (3) 调用函数。
+</p>
+
+<p>
+这样的宏有什么意义呢？上面这样简单的定义除了知道可以这样使用let外，没有实质价值，但如果定义出下面这样的宏，就能明显体现其价值：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java">(<span style="color: #81a2be;">defmacro</span> <span style="color: #f0c674;">defserverfn</span> [name &amp; body]
+        `(let [exec-fn# (fn ~<span style="color: #81a2be;">@body</span>)]
+                (defn ~name [&amp; args#]
+                        (<span style="color: #b5bd68;">try</span>-cause
+                                (<span style="color: #81a2be;">apply</span> <span style="color: #f0c674;">exec</span>-fn# args#)
+                                        (<span style="color: #b5bd68;">catch</span> InterruptedException e#
+                   (<span style="color: #b5bd68;">throw</span> e#))
+                                    (<span style="color: #b5bd68;">catch</span> Throwable t#
+                                                (log-error t# <span style="color: #8abeb7;">"Error on initialization of server "</span> ~(<span style="color: #81a2be;">str</span> <span style="color: #f0c674;">name</span>))
+                                                        (halt-process<span style="color: #81a2be;">!</span> 13 <span style="color: #8abeb7;">"Error on initialization"</span>)
+                                                )))))
+</pre>
+</div>
+</div>
+</div>

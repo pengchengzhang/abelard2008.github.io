@@ -1,51 +1,11 @@
 ---
+category: computer science and enginneering
 layout: post
-title: "postgres source code and theory"
-tagline: "postgres"
+title: "Postgres Source Code and Theory"
 description: "study database through postgres"
-tags: ["database"]
+tags: ["database",tools]
 ---
 {% include JB/setup %}
-<div id="table-of-contents">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents">
-<ul>
-<li><a href="#sec-1">Replacement Selection</a></li>
-<li><a href="#sec-2">planner</a></li>
-<li><a href="#sec-3">sql</a>
-<ul>
-<li><a href="#sec-3-1">generate random number</a></li>
-<li><a href="#sec-3-2">create function for arbitrary date in a specified rang</a></li>
-</ul>
-</li>
-<li><a href="#sec-4">parser</a></li>
-<li><a href="#sec-5">system catalog</a>
-<ul>
-<li><a href="#sec-5-1">pg<sub>opclass</sub></a></li>
-<li><a href="#sec-5-2">pg<sub>am</sub></a></li>
-<li><a href="#sec-5-3">pg<sub>amop</sub></a></li>
-</ul>
-</li>
-<li><a href="#sec-6">operator classes explained</a>
-<ul>
-<li><a href="#sec-6-1">what is an operator class?</a></li>
-<li><a href="#sec-6-2">how it works</a></li>
-<li><a href="#sec-6-3">support functions</a></li>
-<li><a href="#sec-6-4">create the operator classes</a></li>
-<li><a href="#sec-6-5">relative catalog info</a></li>
-<li><a href="#sec-6-6">pg<sub>class</sub></a></li>
-</ul>
-</li>
-<li><a href="#sec-7">system cache management</a></li>
-<li><a href="#sec-8">composite variable declaration</a></li>
-<li><a href="#sec-9">catach cache for create a new user table</a></li>
-<li><a href="#sec-10">data structure</a></li>
-<li><a href="#sec-11">\<sub>bt\</sub><sub>preprocess\</sub><sub>keys</sub>() &#x2013; Preprocess scan keys</a></li>
-<li><a href="#sec-12">some useful calling path</a></li>
-<li><a href="#sec-13">simple path for one simple query</a></li>
-</ul>
-</div>
-</div>
 
 <div id="outline-container-sec-1" class="outline-2">
 <h2 id="sec-1">Replacement Selection</h2>
@@ -69,8 +29,8 @@ ExecSort() extract all tuples
 </div>
 
 <p>
-tuplesort<sub>puttupleslot</sub>() -&gt; &#x2026; -&gt; puttuple<sub>common</sub>(), at this time,
-the state-&gt;status is TSS<sub>INITIAL</sub>, when state-&gt;memtupcount is less than
+tuplesort_puttupleslot() -&gt; &#x2026; -&gt; puttuple_common(), at this time,
+the state-&gt;status is TSS_INITIAL, when state-&gt;memtupcount is less than
 state-&gt;memtupsize, where memtupsize is 8192 (equal to BLCKSZ).
 </p>
 <div class="org-src-container">
@@ -93,11 +53,11 @@ will insert state-&gt;memtuples.
 <div class="outline-text-2" id="text-2">
 <p>
 select * from customer:
-planner()&lt;-pg<sub>plan</sub><sub>query</sub>()&lt;-pg<sub>plan</sub><sub>queries</sub>()&lt;-exec<sub>simple</sub><sub>query</sub>()
+planner()&lt;-pg_plan_query()&lt;-pg_plan_queries()&lt;-exec_simple_query()
 </p>
 
 <p>
-explain select * from customer: planner()&lt;-pg<sub>plan</sub><sub>query</sub>()&lt;-ExplainOneQuery()&lt;-ExplainQuery()
+explain select * from customer: planner()&lt;-pg_plan_query()&lt;-ExplainOneQuery()&lt;-ExplainQuery()
 </p>
 </div>
 </div>
@@ -226,7 +186,7 @@ and the definition for makeNode in nodes.h
 </pre>
 </div>
 <p>
-T_##<sub>type</sub>_ should be paid attention, because it will be assigned
+T_##_type_ should be paid attention, because it will be assigned
 to the first member of the root node, such as SelectStmt.type, after
 that, many task will be completed by the type.  
 </p>
@@ -245,7 +205,7 @@ analysis.
 </div>
 
 <p>
-after parse<sub>analyze</sub>(), we will get a query (type: Query)
+after parse_analyze(), we will get a query (type: Query)
 </p>
 
 <p>
@@ -298,7 +258,7 @@ SelectStmt to Query.
 <h2 id="sec-5">system catalog</h2>
 <div class="outline-text-2" id="text-5">
 </div><div id="outline-container-sec-5-1" class="outline-3">
-<h3 id="sec-5-1">pg<sub>opclass</sub></h3>
+<h3 id="sec-5-1">pg_opclass</h3>
 <div class="outline-text-3" id="text-5-1">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -371,7 +331,7 @@ SelectStmt to Query.
 </div>
 
 <div id="outline-container-sec-5-2" class="outline-3">
-<h3 id="sec-5-2">pg<sub>am</sub></h3>
+<h3 id="sec-5-2">pg_am</h3>
 <div class="outline-text-3" id="text-5-2">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -414,7 +374,7 @@ SelectStmt to Query.
 </div>
 
 <div id="outline-container-sec-5-3" class="outline-3">
-<h3 id="sec-5-3">pg<sub>amop</sub></h3>
+<h3 id="sec-5-3">pg_amop</h3>
 <div class="outline-text-3" id="text-5-3">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -473,7 +433,7 @@ SelectStmt to Query.
 </table>
 </div>
 
-<ul class="org-ul"><li>pg<sub>opfamily</sub><br  /><div class="outline-text-4" id="text-5-3-1">
+<ul class="org-ul"><li>pg_opfamily<br  /><div class="outline-text-4" id="text-5-3-1">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -520,7 +480,7 @@ SelectStmt to Query.
 
 <p>
 NOTE: opcmethod, amopmethod and opfmethod are the same value as
-pg<sub>am's</sub> oid, so that the following query is right:
+pg_am's oid, so that the following query is right:
 </p>
 
 <div class="org-src-container">
@@ -542,7 +502,7 @@ pg<sub>am's</sub> oid, so that the following query is right:
 </div>
 
 <p>
-also, amopfamily in pg<sub>amop</sub> is the same value as pg<sub>opfamily's</sub> oid.
+also, amopfamily in pg_amop is the same value as pg_opfamily's oid.
 </p>
 </div>
 </li></ul>
@@ -839,7 +799,7 @@ explain <span style="color: #b5bd68;">SELECT</span> * <span style="color: #b5bd6
 <h3 id="sec-6-5">relative catalog info</h3>
 <div class="outline-text-3" id="text-6-5">
 <p>
-tuplesort=# select * from pg<sub>operator</sub> where oprnamespace=2200;
+tuplesort=# select * from pg_operator where oprnamespace=2200;
 </p>
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
@@ -905,7 +865,7 @@ tuplesort=# select * from pg<sub>operator</sub> where oprnamespace=2200;
 <td class="right">16</td>
 <td class="right">0</td>
 <td class="right">0</td>
-<td class="left">si<sub>lt</sub></td>
+<td class="left">si_lt</td>
 <td class="left">-</td>
 <td class="left">-</td>
 </tr>
@@ -922,7 +882,7 @@ tuplesort=# select * from pg<sub>operator</sub> where oprnamespace=2200;
 <td class="right">16</td>
 <td class="right">0</td>
 <td class="right">0</td>
-<td class="left">si<sub>lt</sub></td>
+<td class="left">si_lt</td>
 <td class="left">-</td>
 <td class="left">-</td>
 </tr>
@@ -939,7 +899,7 @@ tuplesort=# select * from pg<sub>operator</sub> where oprnamespace=2200;
 <td class="right">16</td>
 <td class="right">0</td>
 <td class="right">0</td>
-<td class="left">si<sub>lt</sub></td>
+<td class="left">si_lt</td>
 <td class="left">-</td>
 <td class="left">-</td>
 </tr>
@@ -956,7 +916,7 @@ tuplesort=# select * from pg<sub>operator</sub> where oprnamespace=2200;
 <td class="right">16</td>
 <td class="right">0</td>
 <td class="right">0</td>
-<td class="left">si<sub>lt</sub></td>
+<td class="left">si_lt</td>
 <td class="left">-</td>
 <td class="left">-</td>
 </tr>
@@ -968,7 +928,7 @@ tuplesort=# select * from pg<sub>operator</sub> where oprnamespace=2200;
 </p>
 
 <p>
-tuplesort=# select * from pg<sub>opfamily</sub> where opfnamespace=2200;
+tuplesort=# select * from pg_opfamily where opfnamespace=2200;
 </p>
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
@@ -994,7 +954,7 @@ tuplesort=# select * from pg<sub>opfamily</sub> where opfnamespace=2200;
 <tbody>
 <tr>
 <td class="right">403</td>
-<td class="left">sva<sub>special</sub><sub>ops</sub></td>
+<td class="left">sva_special_ops</td>
 <td class="right">2200</td>
 <td class="right">10</td>
 </tr>
@@ -1006,7 +966,7 @@ tuplesort=# select * from pg<sub>opfamily</sub> where opfnamespace=2200;
 </p>
 
 <p>
-tuplesort=# select * from pg<sub>opclass</sub> where opcnamespace=2200;
+tuplesort=# select * from pg_opclass where opcnamespace=2200;
 </p>
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
@@ -1044,7 +1004,7 @@ tuplesort=# select * from pg<sub>opclass</sub> where opcnamespace=2200;
 <tbody>
 <tr>
 <td class="right">403</td>
-<td class="left">sva<sub>special</sub><sub>ops</sub></td>
+<td class="left">sva_special_ops</td>
 <td class="right">2200</td>
 <td class="right">10</td>
 <td class="right">41020</td>
@@ -1060,7 +1020,7 @@ tuplesort=# select * from pg<sub>opclass</sub> where opcnamespace=2200;
 </p>
 
 <p>
-tuplesort=# select * from pg<sub>opfamily</sub> where oid=41020;
+tuplesort=# select * from pg_opfamily where oid=41020;
 </p>
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
@@ -1086,7 +1046,7 @@ tuplesort=# select * from pg<sub>opfamily</sub> where oid=41020;
 <tbody>
 <tr>
 <td class="right">403</td>
-<td class="left">sva<sub>special</sub><sub>ops</sub></td>
+<td class="left">sva_special_ops</td>
 <td class="right">2200</td>
 <td class="right">10</td>
 </tr>
@@ -1100,10 +1060,10 @@ tuplesort=# select * from pg<sub>opfamily</sub> where oid=41020;
 </div>
 
 <div id="outline-container-sec-6-6" class="outline-3">
-<h3 id="sec-6-6">pg<sub>class</sub></h3>
+<h3 id="sec-6-6">pg_class</h3>
 <div class="outline-text-3" id="text-6-6">
 <p>
-the pg<sub>class</sub> system table contains one row for each table defined in
+the pg_class system table contains one row for each table defined in
 your database.
 </p>
 </div>
@@ -1117,12 +1077,12 @@ your database.
 <p>
 Every catalog cache must have a corresponding unique index on the
 system table that it caches.[catcache.h] The extend explanation of it
-is that every index in system table (ex., pg<sub>class</sub>) has a
+is that every index in system table (ex., pg_class) has a
 corresponding catalog cache represented by "struct catcache", every
 row of the table that containing such a index has a corresponding tuple (presented by struct CatCtup) 
 ,which is stored in a double linked list, which is a element of
-catcache' variable length array (called cc<sub>bucket</sub>). Which double
-linked list in cc<sub>bucket</sub> is determined by hash value generated from
+catcache' variable length array (called cc_bucket). Which double
+linked list in cc_bucket is determined by hash value generated from
 the row's contents and table's name. 
 </p>
 
@@ -1152,7 +1112,7 @@ the row's contents and table's name.
 
 <p>
 syscache's type is catcache, which is a low-level catalog cache. Every
-system catalog table (ie, pg<sub>class</sub>) is one item of syscache, and each
+system catalog table (ie, pg_class) is one item of syscache, and each
 one is first time initiated by cacheinfo, of course, syscache and
 cacheinfo have the same amount of items.
 </p>
@@ -1173,7 +1133,7 @@ cacheinfo have the same amount of items.
 
 <p>
 cacheinfo's type is cachedesc which defines a single syscache and contains all system catalog tables' index information, and
-takes pg<sub>class</sub> for examples,  
+takes pg_class for examples,  
 </p>
 <div class="org-src-container">
 
@@ -1204,7 +1164,7 @@ ClassNameNspIndexId is defined in indexing.h:
 </div>
 
 <p>
-pg<sub>class</sub><sub>relname</sub><sub>nsp</sub><sub>index</sub> is the table pg<sub>class'</sub> index name, we can
+pg_class_relname_nsp_index is the table pg_class' index name, we can
 verify it using command:
 </p>
 
@@ -1288,26 +1248,26 @@ when create a new user table:
 
 <p>
 The user table's namespace oid is 2200, and corresponding name is
- "public", so the member of new talbe's corresponding relation(type: VarRange) has a value "public" from get\<sub>namespace\</sub><sub>name</sub>():
+ "public", so the member of new talbe's corresponding relation(type: VarRange) has a value "public" from get\_namespace\_name():
 </p>
 
 <p>
-ProcessUtility() -&gt; transformCreateStmt() -&gt; get\<sub>namespace\</sub><sub>name</sub>() 
+ProcessUtility() -&gt; transformCreateStmt() -&gt; get\_namespace\_name() 
 </p>
 
 
 <p>
 In PostgreSQL, creating a new table will define a new class, new type
-and new attributes, so that it will add new row in pg<sub>class</sub>, pg<sub>type</sub>
-and pg<sub>attribute</sub> finished by calling AddNewRelationType(),
-AddNewRelationTuple(pg<sub>class</sub><sub>desc</sub>,&#x2026;) and AddNewAttributeTuples() in
-heap<sub>create</sub><sub>with</sub><sub>catalog</sub>(). At the same time, every system table has a
-corresponding CatCache, so that calling get<sub>relname</sub><sub>relid</sub>() and others to add a relative item in these
+and new attributes, so that it will add new row in pg_class, pg_type
+and pg_attribute finished by calling AddNewRelationType(),
+AddNewRelationTuple(pg_class_desc,&#x2026;) and AddNewAttributeTuples() in
+heap_create_with_catalog(). At the same time, every system table has a
+corresponding CatCache, so that calling get_relname_relid() and others to add a relative item in these
 CatCache variable perspectively is necessary.
 </p>
 
 <p>
-DefineRelation() -&gt; heap\<sub>create\</sub><sub>with\</sub><sub>catalog</sub>()
+DefineRelation() -&gt; heap\_create\_with\_catalog()
 </p>
 </div>
 </div>
@@ -1384,11 +1344,11 @@ A ScanKey represents the application of a comparison operator between
 </div>
 
 <p>
-From ScanKeyData, sk<sub>attno</sub> defines which column in a table or index,
-sk<sub>strategy</sub> indicates that we want to search the column's data &gt;, &gt;=,
-=, &lt; or &lt;= sk<sub>argument</sub>(in general, a constant), sk<sub>func</sub> defines a
+From ScanKeyData, sk_attno defines which column in a table or index,
+sk_strategy indicates that we want to search the column's data &gt;, &gt;=,
+=, &lt; or &lt;= sk_argument(in general, a constant), sk_func defines a
 different function according to the different access
-method Btree, Gist, Gin, or Hash included in pg<sub>am</sub>, so that if
+method Btree, Gist, Gin, or Hash included in pg_am, so that if
 a specific AM is defined the corresponding function such as btgettuple
 will be defined.
 </p>
@@ -1435,7 +1395,7 @@ GinScanOpaque, and GistScanOpaque, HashScanOpaque.
 <p>
 If there is no index in a table, the search will use
 HeapScanDescData. And HeapScanDescData includes many detailed info for
-one talbe such as rs<sub>nblocks</sub>.
+one talbe such as rs_nblocks.
 </p>
 
 <div class="org-src-container">
@@ -1465,7 +1425,7 @@ one talbe such as rs<sub>nblocks</sub>.
 
 
 <div id="outline-container-sec-11" class="outline-2">
-<h2 id="sec-11">\<sub>bt\</sub><sub>preprocess\</sub><sub>keys</sub>() &#x2013; Preprocess scan keys</h2>
+<h2 id="sec-11">_bt_preprocess_keys() &#x2013; Preprocess scan keys</h2>
 <div class="outline-text-2" id="text-11">
 <p>
 comments: One key purpose of this routine is to discover how many scan keys
@@ -1492,8 +1452,8 @@ operator is =, the other &gt;. How can we determine this case in
 PostgreSQL? Key is represented by ScanKey variables, =/&gt; is
 corressponding to operator strategy, which included in Scankey. If
 the above cases exist, there must be two ScanKey variables, and their
-sk<sub>attno</sub> is the same vaule. In \<sub>bt\</sub><sub>preprocess\</sub><sub>keys</sub>(), The
-different ScanKeys with the same sk<sub>attno</sub> will be first stored in a
+sk_attno is the same vaule. In _bt_preprocess_keys(), The
+different ScanKeys with the same sk_attno will be first stored in a
 array xfrom[] in order of operator strategy definition BTLessStrategyNumber, BTLessEqualStrategyNumber,
 BTEqualStrategyNumber, BTGreaterEqualStrategyNumber,
 BTGreaterStrategyNumber, and then check whether they are contradict,
@@ -1544,13 +1504,13 @@ memset(xform, 0, <span style="color: #b5bd68;">sizeof</span>(xform));
 <h2 id="sec-12">some useful calling path</h2>
 <div class="outline-text-2" id="text-12">
 <ul class="org-ul">
-<li>btgettuple()-&gt;<sub>bt</sub><sub>first</sub>()
+<li>btgettuple()-&gt;_bt_first()
 </li>
-<li>btbeginscan()-&gt;RelationGetIndexScan()-&gt;index<sub>rescan</sub>()-&gt;FunctionCall2()-&gt;btgettuple()
+<li>btbeginscan()-&gt;RelationGetIndexScan()-&gt;index_rescan()-&gt;FunctionCall2()-&gt;btgettuple()
 </li>
 
 <li>DefineRelation(CreateStmt *stmt, char relkind)-&gt;
-heap<sub>create</sub><sub>with</sub><sub>catalog</sub>(relname,&#x2026;)-&gt;get<sub>relname</sub><sub>relid</sub>(const char
+heap_create_with_catalog(relname,&#x2026;)-&gt;get_relname_relid(const char
 *relname, Oid relnamespace)-&gt;
 </li>
 </ul>
@@ -1563,7 +1523,7 @@ GetSysCacheOid(RELNAMENSP, PointerGetDatum(relname), ObjectIdGetDatum(relnamespa
                                                   SearchCatCache(SysCache[cacheId],
                                                   key1, key2, key3,
                                                   key4) -&gt;
-                                                  systable<sub>beginscan</sub>(relation,&#x2026;) -&gt;
+                                                  systable_beginscan(relation,&#x2026;) -&gt;
 </p>
 </div>
 </div>
@@ -1572,8 +1532,8 @@ GetSysCacheOid(RELNAMENSP, PointerGetDatum(relname), ObjectIdGetDatum(relnamespa
 <h2 id="sec-13">simple path for one simple query</h2>
 <div class="outline-text-2" id="text-13">
 <p>
-The whole course is mainy finished in exec<sub>simple</sub><sub>query</sub>(const char
-*query<sub>string</sub>), 
+The whole course is mainy finished in exec_simple_query(const char
+*query_string), 
 </p>
 
 <ol class="org-ol">

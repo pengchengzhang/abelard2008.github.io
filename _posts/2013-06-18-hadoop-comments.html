@@ -1,0 +1,119 @@
+---
+category: computer science and enginneering
+layout: post
+title: "Notes of Hadoop"
+Tags: ["Big Data", Hadoop]
+---
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">执行一个Mapreduce应用时，Hadoop内部执行流程</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+在每一个mapreduce分析任务中，都会调用JobClient.runJob(conf)，那么在这之后，hadoop中的mapreduce内部都做了哪些工作呢？
+</p>
+
+<p>
+首先创建了JobClient实例
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #b5bd68;">public</span> <span style="color: #b5bd68;">static</span> <span style="color: #81a2be;">RunningJob</span> <span style="color: #de935f;">runJob</span>(<span style="color: #81a2be;">JobConf</span> <span style="color: #f0c674;">job</span>) <span style="color: #b5bd68;">throws</span> <span style="color: #81a2be;">IOException</span> {
+        <span style="color: #81a2be;">JobClient</span> <span style="color: #f0c674;">jc</span> = <span style="color: #b5bd68;">new</span> <span style="color: #81a2be;">JobClient</span>(job);
+        ...
+}
+</pre>
+</div>
+<p>
+看JobClient的构造函数
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #b5bd68;">public</span> <span style="color: #de935f;">JobClient</span>(<span style="color: #81a2be;">JobConf</span> <span style="color: #f0c674;">conf</span>) <span style="color: #b5bd68;">throws</span> <span style="color: #81a2be;">IOException</span> {
+        setConf(conf);
+        init(conf);
+}
+</pre>
+</div>
+<p>
+这里重点看init(conf)
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #b5bd68;">public</span> <span style="color: #81a2be;">void</span> <span style="color: #de935f;">init</span>(<span style="color: #81a2be;">JobConf</span> <span style="color: #f0c674;">conf</span>) <span style="color: #b5bd68;">throws</span> <span style="color: #81a2be;">IOException</span> {
+        <span style="color: #81a2be;">String</span> <span style="color: #f0c674;">tracker</span> = conf.get(<span style="color: #8abeb7;">"mapred.job.tracker"</span>, <span style="color: #8abeb7;">"local"</span>);
+                <span style="color: #b5bd68;">if</span> (<span style="color: #8abeb7;">"local"</span>.equals(tracker)) {
+                        <span style="color: #b5bd68;">this</span>.jobSubmitClient = <span style="color: #b5bd68;">new</span> <span style="color: #81a2be;">LocalJobRunner</span>(conf);
+                        } <span style="color: #b5bd68;">else</span> {
+                                <span style="color: #b5bd68;">this</span>.jobSubmitClient = createRPCProxy(JobTracker.getAddress(conf), conf);
+                        }        
+                }
+</pre>
+</div>
+<p>
+根据mapred.job.tracker是否为local，确定JobSubmissionProtocol类型的jobSubmitClient最终是完成本地通信还是远程RPC通信。其中通信协议的实现由LocalJobRunner或createRPCProxy完成。
+</p>
+
+<p>
+在JobClient.runJob(conf)创建了JobClient实例后，由下面的语句来提交任务
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #b5bd68;">public</span> <span style="color: #b5bd68;">static</span> <span style="color: #81a2be;">RunningJob</span> <span style="color: #de935f;">runJob</span>(<span style="color: #81a2be;">JobConf</span> <span style="color: #f0c674;">job</span>) <span style="color: #b5bd68;">throws</span> <span style="color: #81a2be;">IOException</span> {
+        <span style="color: #81a2be;">JobClient</span> <span style="color: #f0c674;">jc</span> = <span style="color: #b5bd68;">new</span> <span style="color: #81a2be;">JobClient</span>(job);
+        ...
+                running = jc.submitJob(job);
+        ...
+}
+</pre>
+</div>
+<p>
+在JobClient中的submitJob方法中，先完成一些准备工作(现在不清楚)，最后关键一步是提交任务,
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #b5bd68;">public</span> <span style="color: #81a2be;">RunningJob</span> <span style="color: #de935f;">submitJob</span>(<span style="color: #81a2be;">JobConf</span> <span style="color: #f0c674;">job</span>) <span style="color: #b5bd68;">throws</span> <span style="color: #81a2be;">FileNotFoundException</span>, 
+<span style="color: #81a2be;">InvalidJobConfException</span>, <span style="color: #81a2be;">IOException</span>
+{
+        ...
+                JobStatus status = jobSubmitClient.submitJob(jobId);
+                        <span style="color: #b5bd68;">if</span> (status != <span style="color: #81a2be;">null</span>) {
+                                <span style="color: #b5bd68;">return</span> <span style="color: #b5bd68;">new</span> <span style="color: #81a2be;">NetworkedJob</span>(status);
+                        } <span style="color: #b5bd68;">else</span> {
+                                <span style="color: #b5bd68;">throw</span> <span style="color: #b5bd68;">new</span> <span style="color: #81a2be;">IOException</span>(<span style="color: #8abeb7;">"Could not launch job"</span>);
+                        }
+                }
+</pre>
+</div>
+<p>
+如果mapred.job.tracker为LocalJobRunner的submitJob方法，则会调用
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #b5bd68;">public</span> <span style="color: #81a2be;">JobStatus</span> <span style="color: #de935f;">submitJob</span>(<span style="color: #81a2be;">JobID</span> <span style="color: #f0c674;">jobid</span>) <span style="color: #b5bd68;">throws</span> <span style="color: #81a2be;">IOException</span> {
+        <span style="color: #b5bd68;">return</span> <span style="color: #b5bd68;">new</span> <span style="color: #81a2be;">Job</span>(jobid, <span style="color: #b5bd68;">this</span>.conf).status;
+}
+</pre>
+</div>
+<p>
+这里的Job实例是在LocalJobRunner中设计的private类Job：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #b5bd68;">private</span> <span style="color: #b5bd68;">class</span> <span style="color: #81a2be;">Job</span> <span style="color: #b5bd68;">extends</span> <span style="color: #81a2be;">Thread</span>
+        <span style="color: #b5bd68;">implements</span> <span style="color: #81a2be;">TaskUmbilicalProtocol</span> {
+...
+        <span style="color: #b5bd68;">public</span> Job(<span style="color: #81a2be;">JobID</span> <span style="color: #f0c674;">jobid</span>, <span style="color: #81a2be;">JobConf</span> <span style="color: #f0c674;">conf</span>) <span style="color: #b5bd68;">throws</span> <span style="color: #81a2be;">IOException</span> {
+...
+        status = <span style="color: #b5bd68;">new</span> <span style="color: #81a2be;">JobStatus</span>(id, 0.0f, 0.0f, <span style="color: #81a2be;">JobStatus</span>.RUNNING);
+...
+        jobs.put(id, <span style="color: #b5bd68;">this</span>);
+                <span style="color: #b5bd68;">this</span>.start();
+        }
+}
+</pre>
+</div>
+<p>
+在Job的构造函数Job(JobID jobid, JobConf conf)中，将当前状态设为RUNNING，然后将自身存放到 LocalJobRunner 的HashMap中，最后启动自身线程。
+</p>
+</div>
+</div>

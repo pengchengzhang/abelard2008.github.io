@@ -1,61 +1,47 @@
 ---
+category: computer science and enginneering
 layout: post
-title: "学习 Antlr "
-tags: ["language"]
+title: "Antlr: An amazing framework for constructing recognizers interpreters compilers and translators"
+tags: ["language",compiler]
 ---
 {% include JB/setup %}
 <div id="outline-container-sec-1" class="outline-2">
 <h2 id="sec-1">计算机语言常识</h2>
 <div class="outline-text-2" id="text-1">
 <ul class="org-ul">
-<li>本质 the nature of computer languages dictates the way
+<li>本质 the nature of computer languages dictates the way you specify languages with grammars. 计算机语言的本质要求你用文法来规范语言。
 </li>
-</ul>
-<p>
-you specify languages with grammars. 计算机语言的本质要求你用文法来规
-范语言。
-</p>
-<ul class="org-ul">
 <li>一般论述 
 状态机只能产生正则语言(regula language)，编程语言要求更加复杂的文法
 无关语言，因此正则语言和编程语言的区别，正是状态机和更加复杂机器的区
 别。状态机的弱点是没有内存来记录过去发生的事情，但是为了产生更加复杂
 的语言，记忆功能是必须的。
+</li>
 
-<p>
-复杂语言，是基于树结构的。产生语言的过程，就是构建树的的过程。并且，
+<li>复杂语言，是基于树结构的。产生语言的过程，就是构建树的的过程。并且，
 树结构与方法调用能完美匹配，加方法调用和返回机制就将状态机变成一台能
 产生复杂语言的机器。使用树结构需要内存系统的参与，更进一步，使用内存
 系统的状态机，即使用堆栈的状态机是一台下推自动机(pushdown machine)。
-</p>
+</li>
 
-<p>
-状态机就是在一个方法中的指令流，不能产生方法调用，而下推机能自由调用
+<li>状态机就是在一个方法中的指令流，不能产生方法调用，而下推机能自由调用
 机器的其它部分和返回(与方法调用类似)，这是因为下推机有堆栈，并且这些
 堆栈能将一台机器分成子机器，这些子机器直接与文法规则对应。表示下推机
 要求不同的称为语法图(与流程图类似)的可视化。
-</p>
+</li>
 
-<p>
-语言本质上是高度递归的，没有递归，我们不能任意地产生嵌套的代码块。递
+<li>语言本质上是高度递归的，没有递归，我们不能任意地产生嵌套的代码块。递
 归是让人生畏的，就像L. Peter Deutsch说的，人用迭代，神用递归 (To
 iterate is human, to recurse divine)。
-</p>
 </li>
 <li>正则表达式 一个模式描述，它用一个元语言来描述你想要该模式来匹配的事
-情。A regular expression is a pattern description using a metalanguage, a language that you
+情。A regular expression is a pattern description using a metalanguage, a language that you use to describe what you want the pattern to match.
 </li>
-</ul>
-<p>
-use to describe what you want the pattern to match.
-</p>
 
-<ul class="org-ul">
-<li>语法范畴 Programming language grammars usually refer to words based on their parts
+<li>语法范畴 Programming language grammars usually refer to words based on their parts of speech, sometimes called syntactic categories。译: 编程语言文法通常
 </li>
 </ul>
 <p>
-of speech, sometimes called syntactic categories。译: 编程语言文法通常
 指基于某种语言词汇的单词，有时称为语法范畴。
 </p>
 
@@ -84,14 +70,5 @@ ANTLR Reference: Building Domain-Specific Languages。
 stringtemplate-3.0.jar，因此，运行例子前，需要将这三个包加载到
 CLASSPATH路径中。
 </p>
-<div id="table-of-contents">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents">
-<ul>
-<li><a href="#sec-1">计算机语言常识</a></li>
-<li><a href="#sec-2">运行The Definitive ANTLR Reference的例子</a></li>
-</ul>
-</div>
-</div>
 </div>
 </div>
