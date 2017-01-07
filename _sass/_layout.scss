@@ -1,0 +1,98 @@
+//Delcare sidebar width
+$sidebar-width:200px;
+$sidebar-speed:.3s;
+
+body {
+  background-color: #fff;
+}
+
+.container{
+  max-width:1000px;
+}
+
+main{
+  margin:50px 0;
+}
+
+.main-article{
+  padding-left:$sidebar-width;
+}
+
+.main-sidebar{
+  position:fixed;
+  top:0;
+  left:-10px;
+  bottom:0;
+  width:$sidebar-width+10;
+  padding:50px 20px 50px 30px;
+  font-size:13px;
+  color:rgba(white,.6);
+  z-index: 99;
+  @include background(linear-gradient(120deg, $primary-gradient));
+  .about-lee a{
+    text-decoration: none;
+    &:hover,&:focus{
+      border-bottom:1px solid #fff;
+    }
+  }
+  strong{
+    font-weight: 400;
+    color:#fff;
+  }
+}
+
+
+
+// Sidebar colors
+.home .main-sidebar{
+  @include background(linear-gradient(120deg, $primary-gradient));
+}
+.blog .main-sidebar{
+  @include background(linear-gradient(120deg, $primary-gradient-blog));
+}
+.portfolio .main-sidebar{
+  @include background(linear-gradient(120deg, $primary-gradient-portfolio));
+}
+.about .main-sidebar{
+  @include background(linear-gradient(120deg, $primary-gradient-about));
+}
+.contact .main-sidebar{
+  @include background(linear-gradient(120deg, $primary-gradient-contact));
+}
+
+
+
+
+// Responsive styles
+@include responsive($big-break) {
+
+  // Hide sidebar
+  .main-sidebar{
+    position:absolute;
+    left:-($sidebar-width+10);
+    transition: $sidebar-speed;
+    &.show-main-nav{
+      position:fixed;
+      left:-10px;
+    }
+  }
+
+  // Crush the container padding
+  .container{
+    max-width:1000px-$sidebar-width;
+    transition: $sidebar-speed;
+    .main-article{
+      padding-left:0;
+      transition: $sidebar-speed;
+    }
+  }
+}
+
+// @include responsive($small-break) {
+// }
+
+// Mobile first styles if needed
+// @include mobilefirst($big-break) {
+// }
+// @include mobilefirst($small-break) {
+// }

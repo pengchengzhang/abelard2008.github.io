@@ -1,0 +1,129 @@
+// Author and meta
+.publisher{
+  color:$grey;
+  font-size:14px;
+  img{
+    border-radius:50px;
+    height:40px;
+    width:40px;
+    vertical-align: middle;
+  }
+  iframe{
+    vertical-align: middle;
+  }
+  a{
+    border-bottom:1px solid $grey;
+    color:$grey;
+    text-decoration: none;
+    &:hover,&:focus{
+      border:none;
+    }
+  }
+}
+
+
+
+// Posts
+ul.posts{
+  list-style:none;
+  margin:0 0 $padding;
+  padding:0;
+  li{
+    margin:0;
+    a{
+      display:block;
+      border-bottom:1px dotted $silver;
+      padding:20px 0;
+      // font-size:18px;
+      // color:#666;
+      font-weight:normal;
+      text-decoration: none;
+      &:hover,&:focus{
+        color:$primary-color;
+      }
+      span.date{
+        color:#aaa;
+      }
+      span.title{
+        text-decoration: underline;
+        font-size:22px;
+      }
+      span.excerpt{
+        color:#333;
+        display:block;
+      }
+      &:hover span.title{
+        text-decoration: none;
+      }
+    }
+  }
+}
+
+
+
+
+// Email subscribe floater
+.email-subscribe-floater{
+  background:#fff;
+  padding:20px;
+  position:fixed;
+  z-index:999;
+  bottom:0;
+  right:-200px;
+  min-width:200px;
+  max-width:400px;
+  @include box-shadow(0 0 5px rgba(0,0,0,.3));
+  transition:5s;
+  display:none;
+
+  &.is-visible{
+    display:block;
+    right:0;
+  }
+
+  form{
+    margin:0 0 $padding/2;
+  }
+}
+
+.subscribe-freebie {
+
+  p,
+  a {
+    color: $grey;
+    font-size: 14px;
+  }
+
+  h5 {
+    font-size: 18px;
+    margin: 0;
+  }
+}
+
+
+
+
+
+// Highlight e.g. advertisement
+.post-highlight {
+  background-color: rgba(#FFBC42, .2);
+  border: 1px dashed #FFBC42;
+  margin-right: -20px;
+  margin-left: -20px;
+  padding: $padding/2;
+  position: relative;
+}
+
+
+
+
+
+@include responsive($big-break) {
+
+  // Hide pop-up
+  .email-subscribe-floater {
+    display: none !important;
+  }
+  
+}
+

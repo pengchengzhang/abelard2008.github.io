@@ -1,0 +1,35 @@
+img,video,audio,iframe,object{
+	max-width: 100%;
+}
+
+// SVG icons
+[class^="icon-"]{
+  height: 18px;
+  width: 18px;
+  display: inline-block;
+  fill: currentColor;
+}
+
+// Media class to break container
+.media{
+  margin-left: -50px;
+  margin-right: -50px;
+  text-align: center;
+}
+
+.media-caption {
+  color: $grey;
+  font-size: 14px;
+  text-align: center;
+}
+
+// Responsive styles if needed
+@include responsive($big-break) {
+  .media {
+    margin-left: -10px;
+    margin-right: -10px;
+  }
+}
+
+// @include responsive($small-break) {
+// }

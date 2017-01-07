@@ -1,0 +1,49 @@
+/*
+Error: Invalid CSS after "@import "compass"": expected "{", was ";"
+        on line 8 of /home/abelard/Downloads/blog.bak/sass/screen.scss
+
+3: 
+4: /* Welcome to Compass.
+5:  * In this file you should write your main styles. (or centralize your imports)
+6:  * Import this file using the following HTML or equivalent:
+7:  * <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" /> *\/
+8: @import "compass";
+
+Backtrace:
+/home/abelard/Downloads/blog.bak/sass/screen.scss:8
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/sass-3.4.23/lib/sass/scss/parser.rb:1207:in `expected'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/sass-3.4.23/lib/sass/scss/parser.rb:1137:in `expected'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/sass-3.4.23/lib/sass/scss/parser.rb:1132:in `tok!'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/sass-3.4.23/lib/sass/scss/parser.rb:665:in `block'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/sass-3.4.23/lib/sass/scss/parser.rb:658:in `ruleset'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/sass-3.4.23/lib/sass/scss/parser.rb:684:in `block_child'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/sass-3.4.23/lib/sass/scss/parser.rb:674:in `block_contents'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/sass-3.4.23/lib/sass/scss/parser.rb:125:in `stylesheet'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/sass-3.4.23/lib/sass/scss/parser.rb:41:in `parse'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/sass-3.4.23/lib/sass/engine.rb:406:in `_to_tree'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/sass-3.4.23/lib/sass/engine.rb:281:in `render'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/compass-import-once-1.0.5/lib/compass/import-once/engine.rb:17:in `block in render'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/compass-import-once-1.0.5/lib/compass/import-once/engine.rb:29:in `with_import_scope'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/compass-import-once-1.0.5/lib/compass/import-once/engine.rb:16:in `render'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/sass-3.4.23/lib/sass/plugin/compiler.rb:494:in `update_stylesheet'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/sass-3.4.23/lib/sass/plugin/compiler.rb:215:in `block in update_stylesheets'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/sass-3.4.23/lib/sass/plugin/compiler.rb:209:in `each'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/sass-3.4.23/lib/sass/plugin/compiler.rb:209:in `update_stylesheets'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/compass-1.0.3/lib/compass/sass_compiler.rb:40:in `compile!'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/compass-1.0.3/lib/compass/commands/update_project.rb:49:in `perform'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/compass-1.0.3/lib/compass/commands/base.rb:18:in `execute'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/compass-1.0.3/lib/compass/commands/project_base.rb:19:in `execute'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/compass-1.0.3/lib/compass/exec/sub_command_ui.rb:43:in `perform!'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/compass-1.0.3/lib/compass/exec/sub_command_ui.rb:15:in `run!'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/compass-1.0.3/bin/compass:30:in `block in <top (required)>'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/compass-1.0.3/bin/compass:44:in `call'
+/home/abelard/.rvm/gems/ruby-2.1.1/gems/compass-1.0.3/bin/compass:44:in `<top (required)>'
+/home/abelard/.rvm/gems/ruby-2.1.1/bin/compass:23:in `load'
+/home/abelard/.rvm/gems/ruby-2.1.1/bin/compass:23:in `<main>'
+/home/abelard/.rvm/gems/ruby-2.1.1/bin/ruby_executable_hooks:15:in `eval'
+/home/abelard/.rvm/gems/ruby-2.1.1/bin/ruby_executable_hooks:15:in `<main>'
+*/
+body:before {
+  white-space: pre;
+  font-family: monospace;
+  content: "Error: Invalid CSS after \"@import \"compass\"\": expected \"{\", was \";\"\A         on line 8 of /home/abelard/Downloads/blog.bak/sass/screen.scss\A \A 3: \A 4: /* Welcome to Compass.\A 5:  * In this file you should write your main styles. (or centralize your imports)\A 6:  * Import this file using the following HTML or equivalent:\A 7:  * <link href=\"/stylesheets/screen.css\" media=\"screen, projection\" rel=\"stylesheet\" type=\"text/css\" /> */\A 8: @import \"compass\";"; }

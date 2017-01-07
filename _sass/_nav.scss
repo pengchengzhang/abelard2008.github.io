@@ -1,0 +1,69 @@
+// Navigation
+
+.main-nav{
+  a{
+    display:block;
+    padding:10px 0;
+    color:rgba(white,.6);
+    text-decoration: none;
+    border-bottom:1px dotted rgba(white,.1);
+    font-size:16px;
+    b{
+      font-weight: 400;
+    }
+    [class^="icon-"]{
+      margin-right:10px;
+      vertical-align: middle;
+    }
+    &:first-child{
+      // padding-top:0;
+    }
+    &:hover,&:focus{
+      color:#fff;
+    }
+    &.selected{
+      color:#fff;
+      position: relative;
+      &:before{
+        position:absolute;
+        right:-20px;
+        top:0;
+        content:"";
+        display:block;
+        height:100%;
+        width:5px;
+        background:#fff;
+      }
+    }
+  }
+}
+
+
+
+
+
+// Button nav
+.button-group--home {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: $padding;
+
+  a {
+    flex: 1;
+    margin: 0 10px;
+  }
+}
+
+
+// Responsive styles if needed
+// @include responsive($big-break) {
+// }
+// @include responsive($small-break) {
+// }
+
+// Mobile first styles if needed
+// @include mobilefirst($big-break) {
+// }
+// @include mobilefirst($small-break) {
+// }

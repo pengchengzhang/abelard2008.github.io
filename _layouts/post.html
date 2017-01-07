@@ -1,7 +1,39 @@
 ---
-theme :
-  name : bootstrap-3
 layout: default
+description: Writing about UX, Interaction Design and Front-end Development
 ---
-{% include JB/setup %}
-{% include themes/bootstrap-3/post.html %}
+<p class="publisher"><img src="/img/lee.jpg"> By <a href="http://twitter.com/leemunroe" rel="author">Lee Munroe</a>, <pubdate>{{ page.date| date: "%B %Y" }}</pubdate> </p>
+<h1>{{ page.title }}</h1>
+<div class="post">
+	<p><a href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a></p>
+	{{ content }}
+	<p><a href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a></p>
+	<p>
+	  {% if page.previous.url %} 
+	    <a href="{{site.baseurl}}{{page.previous.url}}">&laquo; {{page.previous.title}}</a> 
+	  {% endif %} 
+	  {% if page.next.url %} 
+	    <a href="{{site.baseurl}}{{page.next.url}}">{{page.next.title}} &raquo;</a> 
+	  {% endif %} 
+	</p>
+</div>
+
+<!-- jquery -->
+<script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
+
+<!-- Disqus comments -->
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'leemunroe'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+
+<!-- Twitter follow button -->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>

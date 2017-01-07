@@ -1,0 +1,23 @@
+---
+layout: default
+body: home
+title: Product &amp; UX Designer in San Francisco, Lee Munroe
+description: Product Designer &amp; Developer from Northern Ireland based in San Francisco, Leading Product Design for Mesosphere's Data Center Operating System
+---
+
+<h1 class="h1--home"><em>Lee Munroe</em><br>Digital Product Designer<br><em>San Francisco</em></h1>
+
+<p class="media"><a href="{{ site.baseurl }}/portfolio"><img src="{{ site.baseurl }}/img/home.jpg" alt="Mailgun"></a></p>
+
+<section class="home-posts">
+  <ul class="posts">
+  {% for post in site.posts limit: 3 %}
+    {% unless post.draft %}
+      <li><a href="{{site.baseurl}}{{ post.url }}"><span class="title">{{ post.title }}</span> <span class="date"> - {{post.date| date: "%b %Y"}}</span><span class="excerpt">{{ post.excerpt | strip_html | truncatewords:30 }}</span></a></li>
+    {% endunless %}
+  {% endfor %}
+    <li><a href="/blog"><span class="title">More blog posts &raquo;</span></a></li>
+  </ul>
+</section>
+
+
