@@ -1,4 +1,4 @@
-name: Lee Munroe
+name: 彭成章 
 # markdown: redcarpet
 highligher: pygments
 baseurl: 
@@ -6,8 +6,8 @@ permalink: /:title/
 paginate: 10
 future: true
 paginate_path: /blog/page/:num
-description: Blog of Product and UX Designer Lee Munroe
-url: http://www.leemunroe.com
+description: 彭成章个人博客 
+url: http://abelard2008.github.io
 gems:
   - jekyll-sitemap
   - jekyll-paginate
