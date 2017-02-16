@@ -1,0 +1,80 @@
+#+STARTUP: showall indent
+#+STARTUP: hidestars
+#+OPTIONS:   H:2 num:nil toc:nil \n:nil ::t |:t -:t f:t *:t <:t
+
+#+OPTIONS:   tex:t  d:nil todo:t pri:nil tags:not-in-toc
+
+#+BEGIN_HTML
+---
+category: computer science and enginneering
+layout: post
+title: "storm 0.9.0-wip16: compile "
+tags: ["Big data", "Storm"]
+---
+#+END_HTML
+
+* 从源代码编译storm
+
+ - 在使用git clone 版本 0.9.0-wip16的storm
+#+BEGIN_SRC sh
+    [abelard@abelard storm-source3]$ git clone https://github.com/nathanmarz/storm.git
+
+    cd storm
+#+END_SRC
+	
+- 执行lein compile
+---------------------
+1. 第一个错误 
+
+    Exception in thread "main" java.lang.ClassNotFoundException: backtype.storm.LocalDRPC, compiling:(testing.clj:1)
+
+	
+    解答： 将storm.trident.testing ns
+    #+BEGIN_SRC java
+	(ns storm.trident.testing
+	(:import [storm.trident.testing FeederBatchSpout FeederCommitterBatchSpout MemoryMapState MemoryMapState$Factory TuplifyArgs])
+	(:import [backtype.storm LocalDRPC])
+	(:import [backtype.storm.tuple Fields])
+	(:import [backtype.storm.generated KillOptions])
+	(:require [backtype.storm [testing :as t]])
+	(:use [backtype.storm util])
+	)
+    #+END_SRC
+
+改为：
+#+BEGIN_SRC java
+	(ns storm.trident.testing
+	(:require [backtype.storm.LocalDRPC])
+	(:import [storm.trident.testing FeederBatchSpout FeederCommitterBatchSpout MemoryMapState MemoryMapState$Factory TuplifyArgs])
+	(:import [backtype.storm LocalDRPC])
+	(:import [backtype.storm.tuple Fields])
+	(:import [backtype.storm.generated KillOptions])
+	(:require [backtype.storm [testing :as t]])
+	(:use [backtype.storm util])
+	)
+
+#+END_SRC
+	
+	  
+
+- lein install
+将storm打包后的jar文件安装到用户主目录(ex.,/home/abelard/)的.m2（mvn的
+目录）下。
+
+运行storm-starter的local mode
+#+BEGIN_SRC sh
+	lein run -m storm.starter.WordCountTopology
+#+END_SRC
+	
+
+
+- 运行storm-starter的distributed mode
+#+BEGIN_SRC sh
+	cd storm-starter
+	lein clean;lein deps;lein compile;lein uberjar
+	storm jar target/storm-starter-0.0.1-SNAPSHOT-standalone.jar	storm.starter.ExclamationTopology exclamation-topology 
+#+END_SRC
+	
+	
+- 可能的错误
+提示storm包重复，是因为project.clj文件写的不对，所以, *uberjar*将storm包，也打入到storm-starter-0.0.1-SNAPSHOT-standalone.jar中了。
