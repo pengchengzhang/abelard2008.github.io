@@ -6,6 +6,7 @@ title: "storm 0.9.0-wip16: compile "
 author: Dillon Peng
 date: Thu Feb 16 11:17:10 CST 2017
 comments: []
+keyword: "storm"
 ---
 
 ### 从源代码0.9.0-wip16编译和运行storm
