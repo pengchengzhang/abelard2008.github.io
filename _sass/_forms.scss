@@ -9,7 +9,7 @@ input[type=text],input[type=email],input[type=phone],input[type=password],input[
   border:1px solid #ccc;
   outline:none;
   height: $line-height;
-  width:300px;
+  width:250px;
   font-size:22px;
   &:focus{
     border-color:$primary-color;

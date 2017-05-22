@@ -1,5 +1,5 @@
 //Delcare sidebar width
-$sidebar-width:190px;
+$sidebar-width:150px;
 $sidebar-speed:.3s;
 
 body {
@@ -10,7 +10,7 @@ body {
   display: block;
   float:right;
   width: 610px;
-  padding: 0px 0px 0px 0px;
+  padding: 20px 0px 10px 0px;
 //  max-width:1000px;
 }
 
@@ -25,7 +25,18 @@ body {
   margin-left: auto;
   background-color: #333;
   background-position: 0px 0px;
-  
+  border-bottom: 2px solid red;  
+}
+
+.pageFooter {
+  width: 830px;
+  margin-right: auto;
+  margin-left: auto;
+  background-position: 0px 0px;
+  border-top: 2px solid grey;  
+  padding-top: 10px;
+  clear: both;
+  text-align:center;
 }
 
 h1 {
@@ -33,16 +44,6 @@ color: #FFFFFF;
 text-align:center;
 font-size: 51px;
 -webkit-text-fill-color: white;
-/*background:-webkit-linear-gradient(top, rgb(230, 249, 232), rgb(230, 249, 232));
-    background-position-x: initial;
-    background-position-y: initial;
-    background-size: initial;
-    background-repeat-x: initial;
-    background-repeat-y: initial;
-    background-attachment: initial;
-    background-origin: initial;
-    background-clip: initial;
-    background-color: initial;*/
 }
 .main-article{
   width: 710px;
@@ -50,16 +51,12 @@ font-size: 51px;
 }
 
 .main-sidebar{
-/*
-  position:fixed;
-  top:50px;
-  left:310px;
-*/
   display: block;
   float: left; 
   bottom:0;
   width:$sidebar-width+10;
-  padding:0px 0px 0px 0px;
+  padding:20px 0px 0px 0px;
+  border-right:2px solid gray;
   font-size:13px;
   color:rgba(white,.6);
   z-index: 99;
