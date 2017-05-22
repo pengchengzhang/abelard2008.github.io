@@ -18,8 +18,9 @@
     &:first-child{
       // padding-top:0;
     }
+
     &:hover,&:focus{
-      color:#fff;
+      color:red;
     }
     &.selected{
       color:red;
@@ -32,8 +33,7 @@
         display:block;
         height:100%;
         width:5px;
-        background:#fff;
-      }
+      } 
     }
   }
 }

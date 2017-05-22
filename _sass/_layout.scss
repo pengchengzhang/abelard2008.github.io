@@ -1,5 +1,5 @@
 //Delcare sidebar width
-$sidebar-width:200px;
+$sidebar-width:190px;
 $sidebar-speed:.3s;
 
 body {
@@ -7,28 +7,62 @@ body {
 }
 
 .container{
-  max-width:1000px;
+  display: block;
+  float:right;
+  width: 610px;
+  padding: 0px 0px 0px 0px;
+//  max-width:1000px;
 }
 
-main{
-  margin:50px 0;
+.canvasWrapper{
+  width: 830px;
+  margin-right: auto;
+  margin-left: auto;
+}
+.pageHeader{
+  width: 830px;
+  margin-right: auto;
+  margin-left: auto;
+  background-color: #333;
+  background-position: 0px 0px;
+  
 }
 
+h1 {
+color: #FFFFFF;
+text-align:center;
+font-size: 51px;
+-webkit-text-fill-color: white;
+/*background:-webkit-linear-gradient(top, rgb(230, 249, 232), rgb(230, 249, 232));
+    background-position-x: initial;
+    background-position-y: initial;
+    background-size: initial;
+    background-repeat-x: initial;
+    background-repeat-y: initial;
+    background-attachment: initial;
+    background-origin: initial;
+    background-clip: initial;
+    background-color: initial;*/
+}
 .main-article{
-  padding-left:$sidebar-width;
+  width: 710px;
+  padding-left:0px;
 }
 
 .main-sidebar{
+/*
   position:fixed;
   top:50px;
   left:310px;
+*/
+  display: block;
+  float: left; 
   bottom:0;
   width:$sidebar-width+10;
-  padding:50px 20px 50px 30px;
+  padding:0px 0px 0px 0px;
   font-size:13px;
   color:rgba(white,.6);
   z-index: 99;
-  @include background(linear-gradient(120deg, $primary-gradient));
   .about-lee a{
     text-decoration: none;
     &:hover,&:focus{
@@ -43,7 +77,7 @@ main{
 
 
 
-// Sidebar colors
+/* Sidebar colors
 .home .main-sidebar{
   @include background(linear-gradient(120deg, $primary-gradient));
 }
@@ -58,7 +92,7 @@ main{
 }
 .contact .main-sidebar{
   @include background(linear-gradient(120deg, $primary-gradient-contact));
-}
+}*/
 
 
 
