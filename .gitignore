@@ -5,3 +5,5 @@ node_modules
 *~
 *.swp
 *.swo
+/_sass/#*#
+/_sass/*.css

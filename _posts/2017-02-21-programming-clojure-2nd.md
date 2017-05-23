@@ -8,7 +8,7 @@ date: Tue Feb 21 14:28:49 CST 2017
 comments: []
 ---
 
-书中一些例子直接在*cider-repl*中敲入并不能得到想要的结果, https://github.com/abelard2008/programming-clojure-2nd
+书中一些例子直接在*cider-repl*中敲入并不能得到想要的结果,[https://github.com/abelard2008/programming-clojure-2nd](https://github.com/abelard2008/programming-clojure-2nd) 
 ### 如何完整运行*6.4 Datatypes*中p155 *(gulp vault)*
 - *6.3 Protocols*最后的示例代码存入
 [io.clj](https://github.com/abelard2008/programming-clojure-2nd/blob/master/chapter6/io.clj),
@@ -19,7 +19,6 @@ comments: []
 - *6.4 Datatypes*最后部分，从*p155*的 `src/examples/cryptovault-complete.clj` 开始的代码存入
   [cryptovault-complete.clj](https://github.com/abelard2008/programming-clojure-2nd/blob/master/chapter6/io.clj),
   特别注意，为了演示*(gulp vault)*, *cryptovault-complete.clj*最后几行为:
-
 ```clojure
 (def vault (->CryptoVault "vault-file" "keystore" "toomanysecrets"))
 (init-vault vault)

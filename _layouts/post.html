@@ -2,12 +2,12 @@
 layout: default
 description: 
 ---
-<p class="publisher"><img src="/img/dillon.jpg"> By <a href="http://twitter.com/abelard2008" rel="author">Dillon Peng</a>, <pubdate>{{ page.date| date: "%B %Y" }}</pubdate> </p>
-<h3>{{ page.title }}</h3>
+<p class="publisher"><img src="/img/dillon.jpg"> By <a href="http://twitter.com/abelard2008" rel="author">Dillon Peng</a>, <pubdate>{{ page.last-modified-date| date: "%B %d, %Y" }}</pubdate> </p>
+<h4>{{ page.title }}</h4>
 <div class="post">
-	<p><a href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a></p>
+<!--	<button><a href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a></button> -->
 	{{ content }}
-	<p><a href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a></p>
+<!--	<p><a href="https://twitter.com/share" class="twitter-share-button" data-lang="en">Tweet</a></p> -->
 	<p>
 	  {% if page.previous.url %} 
 	    <a href="{{site.baseurl}}{{page.previous.url}}">&laquo; {{page.previous.title}}</a> 
