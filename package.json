@@ -1,0 +1,29 @@
+{
+  "name": "abelard",
+  "version": "0.1.0",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-uglify": "~0.3.1",
+    "grunt-contrib-sass": "~0.6.0",
+    "grunt-contrib-compass": "~0.7.0",
+    "grunt-jekyll": "^0.4.2",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-concurrent": "^1.0.0"
+  },
+  "description": "blog ====",
+  "main": "Gruntfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abelard2008/abelard2008.github.io.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abelard2008/abelard2008.github.io/issues"
+  },
+  "homepage": "https://github.com/abelard2008/abelard2008.github.io#readme"
+}

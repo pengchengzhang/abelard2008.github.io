@@ -12,14 +12,14 @@ comments: []
 
  使用git clone 版本 0.9.0-wip16的storm
 ```sh
-   [abelard@abelard storm-source3]$ git clone https://github.com/nathanmarz/storm.git
-   [abelard@abelard storm-source3] cd storm
+ [abelard@abelard storm-source3]$ git clone https://github.com/nathanmarz/storm.git
+ [abelard@abelard storm-source3] cd storm
 ```
 
 ### 执行lein compile
 
  - 第一个错误 
-```sh
+```clojure
     Exception in thread "main" java.lang.ClassNotFoundException: backtype.storm.LocalDRPC, compiling:(testing.clj:1)
 ```
 	
@@ -53,16 +53,16 @@ comments: []
 目录）下。
 
 运行storm-starter的local mode
-```sh
-	lein run -m storm.starter.WordCountTopology
+```shell
+ lein run -m storm.starter.WordCountTopology
 ```
 	
 ### 运行storm-starter的distributed mode
 
 ```sh
-	cd storm-starter
-	lein clean;lein deps;lein compile;lein uberjar
-	storm jar target/storm-starter-0.0.1-SNAPSHOT-standalone.jar	storm.starter.ExclamationTopology exclamation-topology 
+ cd storm-starter
+ lein clean;lein deps;lein compile;lein uberjar
+ storm jar target/storm-starter-0.0.1-SNAPSHOT-standalone.jar	storm.starter.ExclamationTopology exclamation-topology 
 ```
 	
 	

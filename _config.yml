@@ -1,6 +1,6 @@
 name: 彭成章 
-# markdown: redcarpet
-highligher: pygments
+markdown: kramdown
+highligher: rouge
 baseurl: 
 permalink: /:title/
 paginate: 10
@@ -15,3 +15,8 @@ gems:
 sass:
   sass_dir: _sass
   style: compressed
+kramdown:
+    highlighter: rouge
+    syntax_highlighter_opts:
+        block:
+            line_numbers: true
