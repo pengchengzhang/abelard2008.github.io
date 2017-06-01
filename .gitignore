@@ -3,6 +3,7 @@ _site
 node_modules
 .sass-cache
 *~
+*#
 *.swp
 *.swo
 /_sass/#*#
