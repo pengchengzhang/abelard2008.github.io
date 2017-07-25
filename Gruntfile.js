@@ -13,14 +13,12 @@ module.exports = function(grunt) {
                 dest: 'js/build/production.js'
             }
         },
-
         uglify: {
             build: {
                 src: 'js/build/production.js',
                 dest: 'js/build/production.min.js'
             }
         },
-
         compass: {
             dist: {
               options: {
