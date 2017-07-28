@@ -3,7 +3,7 @@ body {
   font-weight: 400;
   font-style: normal;
   font-size:18px;
-  line-height:1.6;
+  line-height:1.2;
   color: #333;
 }
 
@@ -23,7 +23,7 @@ blockquote {
 
 h1,h2,h3,h4,h5,.main-nav,.btn{
   font-family: "PT Sans Narrow", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-  line-height:1.4;
+  line-height:1.2;
 }
 
 h1 {
@@ -49,14 +49,14 @@ h1 {
 
 h2,h4 {
   font-size: 42px;
-  margin: 20px 0 10px;
+  margin: 10px 0 10px;
   font-weight: 700;
   font-style: normal;
 }
 
 h3,h5 {
   font-size: 32px;
-  margin: 20px 0 10px;
+  margin: 10px 0 10px;
   font-weight: 400;
   font-style: normal;
 }
@@ -80,18 +80,18 @@ h4+h5{
 // }
 
 p {
-  margin: 0 0 $padding/2;
+  margin: 0 0 10;
 }
 
 pre{
-  background-color:#272822;
+//  background-color:#272822;
   padding:20px;
   overflow-x:auto;
   font-size:16px;
   word-break:break-all;
   word-wrap:break-word;
   white-space:pre-wrap;
-  color:#fff;
+  color:#333;
   // @include border-radius($br);
   font-family:"Courier New", monospace;
   // border:1px solid darken(whitesmoke,20%);
