@@ -1,0 +1,12 @@
+#+STARTUP: showall indent
+#+STARTUP: hidestars
+#+OPTIONS:   H:2 toc:nil \n:nil ::t |:t -:t f:t *:t <:t
+
+#+OPTIONS:   tex:t  d:nil todo:t pri:nil tags:not-in-toc
+#+BEGIN_HTML
+
+#+END_HTML
+
+** [[http://www.amazon.com/Little-Java-Few-Patterns/dp/0262561158][A little Java]]
+
+** [[https://en.wikipedia.org/wiki/Structure_and_Interpretation_of_Computer_Programs][Structure and Interpretation of Computer Programs (SICP)]]

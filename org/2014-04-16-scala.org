@@ -1,0 +1,722 @@
+#+STARTUP: showall indent
+#+STARTUP: hidestars
+#+OPTIONS:   H:2 num:nil toc:nil \n:nil ::t |:t -:t f:t *:t <:t
+#+OPTIONS:   tex:t  d:nil todo:t pri:nil tags:not-in-toc
+#+BEGIN_HTML
+---
+category: computer science and enginneering
+layout: post
+title: "Refresh some Knowledge about Language through Scala"
+tags: ["Language", Scala]
+---
+{% include JB/setup %}
+
+#+END_HTML
+
+由于spark[fn:2]是用scala语言实现的，不得不又学习一门新的语言：集函数式和面向
+对象于一身的语言。在学习 Programming in Scala[fn:1]，确实又有很多值得
+刷新的知识，必须先记录的有： 模式匹配(pattern match)、不可变和可变、多
+重继承、协变和逆变、按名参数(call-by-name parameters)和Actor模式
+
+** case classes
+case classes 是用在模式匹配中的特殊的类。当定义class时，如果用了case修饰符
+，编译器将为你做四件事情：
+- 添加一个以类名命名的工厂方法，意味着：
+#+BEGIN_SRC emacs-lisp -n -r
+case class Var(x: String)
+val a = Var("x") //产生一个对象
+
+class Varr(x: String)
+val b = Varr("x") // error: not found: value Varr
+
+val b = new Varr("x")
+#+END_SRC
+
+- 参数列表中的所有参数都会被编译器自动添加一个val前缀，使得每个参数都
+  成为一个字段。
+#+BEGIN_SRC emacs-lisp -n -r
+scala> case class Var(x: String)
+scala> val a= new Var("x")
+scala> a.x
+res9: String = x
+
+class Varr(x: String)
+val b = new Varr("x") //error: value x is not a member of Varr
+
+scala> class Var(val x: String)
+
+OR
+
+scala> class Var(y: String) {
+     | def x = y }
+
+scala> val b = new Varr("x")
+b: Varr = Varr@4bbbd16b
+
+scala> b.x
+res7: String = x
+#+END_SRC
+
+- 编译器给case classes自动添加toString、hashCode和equals的实现。那将会
+  print、hash和compare包含其类和所有它的参数的整棵树。另外，因
+  为”==“总是委托给euqals，意味着case classes的元素总是在结构上被比较。
+#+BEGIN_SRC emacs-lisp -n -r
+scala> println(op)
+BinOp(+,Number(1.0),Var(x))
+scala> op.right == Var("x")
+res3: Boolean = true
+#+END_SRC
+
+- 编译器添加了一个copy方法到case classes中，用于被修改的copy。
+#+BEGIN_SRC emacs-lisp -n -r
+scala> op.copy(operator = "-")
+res4: BinOp = BinOp(-,Number(1.0),Var(x))
+#+END_SRC
+
+**  模式匹配[fn:3] [fn:4]
+    通常情况下，模式匹配是一种技术，它对一些对象进行命名并且使用已知的
+    结构将数据结构和对象分解成该技术内部的组成元素，对Scala而言，它的
+    模式匹配有case classes、extractor等种类，每一种内部都有自己的组成
+    元素。
+    scala的match表达式可以看成为java风格的switch，即一个java的switch能
+    表达成match表达式，其中每个模式是一个常量，且最后是一 个通配符
+    default。但区别表现在三个方面：(1) scala的match是一个表达式，例如
+    它总是产生一个值(java的switch是一个语句称为statement) (2)scala的选
+    项表达式从不会转入到下一个case中(java的case必须有break来达到该目的)
+    (3) 如果都不匹配，将会抛出MatchError，java的default是可有可无的，
+    即没有default不会抛出异常。另外，也是最重要的，scala不仅能匹配java
+    所支持的有限的基本数据类型和基本数据类型的封装匹配，它通过case
+    classes支持构造器模式(constructor pattern)外，还有通配符模式
+    (wildcard pattern)、常量模式(constant pattern)、变量模式(variable
+    pattern)、序列模式(sequence pattern)、元组模式(tuple pattern)和类
+    型模式(typed pattern)
+
+Scala的模式匹配的理论来自于论文“A Term Pattern-Match Compiler
+Inspired by Finite Automata Theory"，在Burak Emir的博士论文“Object-Oriented Pattern
+Matching”，描述了其理论与实现。
+
+- 通配符模式
+#+BEGIN_SRC emacs-lisp -n -r
+expr match {
+case BinOp(op, left, right) => println(expr +" is a binary operation") 
+case _ =>  // "_"支持任何对像
+}
+#+END_SRC
+
+- 常量模式
+#+BEGIN_SRC emacs-lisp -n -r
+def describe(x: Any) = x match {
+case 5 => "five"
+case true => "truth"
+case "hello" => "hi!"
+case Nil => "the empty list"
+case _ => "something else"
+}
+#+END_SRC
+
+- 变量模式
+#+BEGIN_SRC emacs-lisp -n -r
+val pi = math.Pi
+E match {
+case pi => "strange math? Pi = "+ pi
+}
+#+END_SRC   
+
+- 构造器模式
+构造器模式(Constructor patterns)可以用于定义所谓的深度匹配(deep matches)。
+#+BEGIN_SRC emacs-lisp -n -r
+ex1.
+abstract class Expr
+case class Var(name: String) extends Expr
+case class Number(num: Double) extends Expr
+expr match {
+case BinOp("+", e, Number(0)) => println("a deep match")
+case _ =>
+
+ex2.
+注： x :: xs1 为右结合，其::是一个类，表示为： 
+::(xs1, x) 参考 section 22.1的 The :: class
+def rev[T](xs: List[T]): List[T] = xs match {
+case List() => xs
+case x :: xs1 => rev(xs1) ::: List(x) 
+}
+}
+#+END_SRC
+
+Scala允许在模式表达式后面规定条件,这些条件称为模式警卫(pattern guards)。
+如下例的line [[(guards)]]：
+#+BEGIN_SRC emacs-lisp -n -r
+val salaryTable = new Table(200,100) {
+    reactions += {
+    case TableUpdated(salaryTable, rows, cols)
+        if cols % 2 == 0 => // ... (ref:guards)
+   }
+}
+
+#+END_SRC
+- 序列模式
+类型有：List 和 Array
+#+BEGIN_SRC emacs-lisp -n -r
+ex1.
+expr match {
+case List(0, _, _) => println("found it")
+case _ =>
+}
+
+ex2
+//注：_* 用于匹配任意长度的列表
+expr match {
+case List(0, _*) => println("found it")
+case _ =>
+}
+#+END_SRC
+
+- 元组模式
+#+BEGIN_SRC emacs-lisp -n -r
+def tupleDemo(expr: Any) =
+expr match {
+case (a, b, c) => println("matched "+ a + b + c)
+case _ =>
+}
+#+END_SRC
+
+- 类型模式
+#+BEGIN_SRC emacs-lisp -n -r
+def generalSize(x: Any) = x match {
+case s: String => s.length
+case m: Map[_, _] => m.size
+case _ => 1
+}
+#+END_SRC
+
+** 模式匹配的用例
+模式匹配无处不在，需要对此有深入的理解，才可以看到它的精髓和发挥到极致。
+- 变量定义
+#+BEGIN_SRC emacs-lisp -n -r
+scala> val myTuple = (123, "abc")
+myTuple: (Int, java.lang.String) = (123,abc)
+scala> val (number, string) = myTuple
+number: Int = 123
+string: java.lang.String = abc
+#+END_SRC
+- 用多个case构建部分函数
+在大括号中的多个case能出现在可以定义函数的任何地方。一个case就是一个函数定
+义，只是更普遍。
+
+部分函数： 只能对定义域中的部分值进行求值的函数。
+
+这样的的case序列用于形成部分函数(partial function)。如果传递了一个不被
+支持的参数给这样的函数，将会产生一个运行时的异常。
+#+BEGIN_SRC emacs-lisp -n -r
+val second: List[Int] => Int = {
+case x :: y :: _ => y
+}
+
+scala> second(List())
+scala.MatchError: List()
+at $anonfun$1.apply(<console>:17)
+at $anonfun$1.apply(<console>:17)
+#+END_SRC
+如果想要明确定义一个部分函数，必须首先让编译器知道要使用部分函数。像上
+面的定义 List[Int] => Int 则包括了从Int列表到Int映射的全部函数，不管是
+否这个函数是部分的(因为这里没有列出所有情况)。如果想要只包含部分函数，
+则需要使用关键字PartialFunction，写成PartialFunction[List[Int], Int]。
+如下定义一个部分函数类型：
+#+BEGIN_SRC emacs-lisp -n -r
+val second: PartialFunction[List[Int],Int] = { (ref:part)
+case x :: y :: _ => y
+}
+#+END_SRC
+
+部分函数有个方法isDefinedAt，它用于测试该函数是否在某些特定值中进行了
+定义。这样一来，上面的例子无论遇到什么样Int列表，都会有两个元素true和
+false。因此line [[(part)]] 经过编译器翻译时，要翻译两次，一次是真实的
+函数实现，一次是对应的isDefinedAt，上面的定义翻译如下：
+#+BEGIN_SRC emacs-lisp -n -r
+new PartialFunction[List[Int], Int] {
+def apply(xs: List[Int]) = xs match {
+case x :: y :: _ => y
+}
+def isDefinedAt(xs: List[Int]) = xs match {
+case x :: y :: _ => true
+case _ => false
+}
+}
+#+END_SRC
+只要出现PartialFunction的地方就会进行这样的翻译，如果申明为Function1或
+没有类型，(只有 => )则翻译成全函数。
+
+- for表达式中的模式匹配
+#+BEGIN_SRC emacs-lisp -n -r
+scala> for ((country, city) <capitals)
+println("The capital of "+ country +" is "+ city)
+The capital of France is Paris
+The capital of Japan is Tokyo
+
+scala> val results = List(Some("apple"), None,
+Some("orange"))
+results: List[Option[java.lang.String]] = List(Some(apple),
+None, Some(orange))
+scala> for (Some(fruit) <results)
+println(fruit)
+apple
+orange
+#+END_SRC
+第2个例子，可以明显看到模式匹配的痕迹。
+
+** 不可变的数据结构(immutable data structure) 
+scala提供了函数式编程语言重要的基石，那就是不可变的数据结构。并且，
+scala在java API的基础上提供了很多不可变的数据类型，如List、Tuple、Map
+和Set。
+
+** 引用透明性(referencially transparent)
+函数编程的思想还包括：方法或称函数不应该有副作用(side effects)，这些方
+法只是通过参数和返回结果与他们的环境进行交互。这样的方法称为引用透明性，
+那意味着，对于给定的输入，方法调用能用它的返回结果替换，而不会影响程序
+的语义。
+举例如下：
+#+BEGIN_SRC emacs-lisp -n -r
+def add(x: Int, y: Int): Int = {
+   x + y
+}
+
+val (a, b) = (13,14)
+val c = add(a,b) (ref:add)
+
+def add2(x: Int, y: Int): Int = {
+    println("a + b = " + (x + y))
+    x + y
+}
+
+val c = add2(a,b) (ref:add2)
+#+END_SRC
+在第 [[(add)]] 行调用 add 函数调用的位置，可用 27 代替，不会影响程序的语义，
+而在 第 [[(add2)]] 行，如果用 27 代替 add2 函数调用，就与程序原有的语
+义不一致，因为函数add2()有副作用：打印语句。
+
+** trait
+Scala 使用trait，使其看起来有点像多重继承，值得提到的，有如下几点，第一，
+trait像Java的接口，而它们也有方法实现，具有<松本行弘的程序世界>说的
+ 实现继承(另一种继承叫规格继承，如class)能力，甚至有成员变量(fields)；第二，
+不像类，trait能加新的功能到一个未确定的超类中；第三，对super的解释，多
+重继承中，被super调用的方法在调用的位置确定，但是使用trait，被调用的方
+法通过类的线性化(linearizatioin)来确定并将traits混合进类中，也即trait
+的super调用，如super.toString()，是动态绑定的，而abstract class或class
+是静态绑定的，就这个区别使能了以堆栈方式进行修改，举例如下：
+#+BEGIN_SRC emacs-lisp -n -r -r
+abstract class IntQueue {
+  def get(): Int
+  def put(x: Int)
+}
+
+import scala.collection.mutable.ArrayBuffer
+
+class BasicIntQueue extends IntQueue {
+  private val buf = new ArrayBuffer[Int]
+  def get() = buf.remove(0)
+  def put(x: Int) { buf += x }
+}
+
+trait Doubling extends IntQueue {
+  abstract override def put(x: Int) { super.put(2 * x) } (ref:double)
+}
+
+trait Incrementing extends IntQueue { 
+  abstract override def put(x: Int) (ref:incrementing) 
+      { super.put(x + 1) } (ref:super-put)
+}
+
+trait Filtering extends IntQueue {
+  abstract override def put(x: Int) { (ref:filtering)
+    if (x >= 0) super.put(x) 
+  }
+}
+
+scala> val q = new BasicIntQueue with Doubling with Incrementing  (ref:stack1)
+q: BasicIntQueue with Doubling with Incrementing = $anon$1@60c8fab
+
+scala> q.put(42)
+
+scala> q.get()
+res12: Int = 86
+
+scala> val q = new BasicIntQueue with Incrementing with Doubling (ref:stack2)
+q: BasicIntQueue with Incrementing with Doubling = $anon$1@2a7a3919
+
+scala> q.put(42)
+
+scala> q.get()
+res14: Int = 85
+
+#+END_SRC
+line [[(stack1)]]  和 line [[(stack2)]] 的 with Doubling with
+Incrementing 和 with Incrementing with Doubling， 顺序的不同，所产生的
+结果是不同的，明显地看到堆栈的痕迹，同时也可以理解super为什么需要动态
+绑定，如line [[(super-put)]] 的 super.put，由于自己在继承类中位置的不
+同，所使用的super肯定不同。
+
+另外，代码中的line [[(double)]] [[(incrementing)]] [[(filtering)]]
+使用了 abstract override 是专门用于修改超类中某一方法时，所必须的特定语
+法。
+
+** 协变和逆变
+引入协变、逆变和不变，主要基于Java支持协变所引起的编译时和运行时的不一
+致所带来的问题，如下的Java代码，编译时ok，但运行时出现
+ArrayStoreException。
+#+BEGIN_SRC emacs-lisp -n -r
+// this is Java
+String[] a1 = { "abc" };
+Object[] a2 = a1;
+a2[0] = new Integer(17); (ref:assign)
+#+END_SRC
+在运行时，第[[(assign)]] 行引发如下错误:
+#+BEGIN_EXAMPLE
+Exception in thread "main" java.lang.ArrayStoreException:
+java.lang.Integer
+at JavaArrays.main(JavaArrays.java:8)
+#+END_EXAMPLE
+这是因为在运行时，Java存储数组的元素类型，然后，在每次数组元素被更新时，
+将检查新元素值的存储类型，如果该值不是那个类型的实例，就会抛出
+ArrayStoreException。为了解决这样的问题，在Scala中，Array是不变的，即
+#+BEGIN_SRC emacs-lisp -n -r
+// this is Scala
+String[] a1 = { "abc" };
+Object[] a2 = a1;
+#+END_SRC
+上述代码，在第2行，会引起编译错误。
+
+- 子类型(subtype) 在需要父类型的地方，scala编译器允许将其替换为子类型
+中的任何一个。对于没有类型参数的class或trait，子类型关系与子类关系对应，
+对于有类型参数的class或trait，如果类型参数标注为协变或逆变，则按不同的
+方向形成有子类型关系，如果类型参数没有标注，则不会形成子类型关系。
+
+- 协变(covariant) 一个协变标注能通过下面的方式应用到class或trait的类型参
+  数中，即在类型参数前面添加加号"+"。根据定义，class或traitn将根据标注
+  参数的类型来确定协变意义上的子类型方向。如List类型是协变的，因
+  此List[String]是List[Any]的子类型。
+
+- 逆变(contravariant) 一个逆变标注能通过下面的方式应用到class或trait的类型参
+  数中，即在类型参数前面添加加号"+"。根据定义，class或traitn将根据标注
+  参数的类型来确定逆变意义上的子类型方向。如Function1的第一个参数类型
+  是逆变的，因此Function1[Any, Any]是Function1[String, Any]的子类性。
+
+逆变和协变的应用例子，在scala的实现中非常多，如Function1的定义(取自2.9.2)
+
+#+BEGIN_SRC emacs-lisp -n -r
+//PartialFunction.scala version 
+trait Function1[-A, +B] extends AnyRef {
+   ...
+}
+#+END_SRC
+- Function1类型参数的第参数 第一个类型为“-A”，意味着逆变，第2个为协变，
+  根据定义，可以得到如下公理：
+
+  | T1' <: T1                                |
+  | T2 <: T2'                                |
+  |------------------------------------------|
+  | Function1[T1, T2] <: Function1[T1', T2'] |
+
+Function1的参数类型定义，明确了一个规则：所有的输入都应该为负位置
+(negative positions)，所有输出为正位置(positive positions)。
+
+考虑含有多个case的情况，case之间必须符合先子类，后父类的原则，否则导致
+  不可达的异常情况，
+#+BEGIN_SRC emacs-lisp -n -r
+ class A
+ class B extends A
+ class C extends B
+ scala> val withDefault: A => B = {
+ | case x:B => new B
+ | case x:A => new B }
+ withDefault: A => B = <function1>
+#+END_SRC
+在上面的代码中，case x:B 一定要出现在 case x:A的前面，否则会导致不可达
+的编译错误。另外：  Function1[A,B] <: Function1[B,B] 
+
+- 为什么设置成contravariant [fn:6]
+
+假设如下继承关系：
+#+BEGIN_SRC emacs-lisp -n -r
+Animal <- Duck
+Animal <- Dog
+Duck <- WhiteDuck
+Duck <- BlackDuck
+#+END_SRC
+且有一个函数 =funcWithFuncParam(x: Duck => Int)(y: Duck)= 需要一个函数
+~Duck => Int~ 作为它的参数，如果 ~WhiteDuck => Int~ 是 ~Duck =>
+Int~ 的子类型( ~WhiteDuck <: Duck~ )，且能够传递给该函
+数~funcWithFuncParam~，则如下代码成立:
+#+BEGIN_SRC emacs-lisp -n -r
+def funcWhiteDuck(x: WhiteDuck): Int = {8}
+val f1 = funcWithFuncParam(funcWhiteDuck) _ 
+f1(new WhiteDuck) 
+#+END_SRC
+有因为 ~Duck => Int~ 且 WhiteDuck 和 BlackDuck都是Duck的子类，因
+此 ~f1(new BlackDuck)~ 也应该可以执行，这显然是不合法的，就像 val
+x:Integet = "string" 一样不合法。当然Scala不允许出现上面的情况，因
+此， ~Animal => Int~ 才是 ~Duck =>Int~ 的子类，如下代码才能在Scala中运行，并符合子类“是一“个父类的原则。
+
+#+BEGIN_SRC emacs-lisp -n -r
+Animal <- Duck
+Animal <- Dog
+Duck <- WhiteDuck
+Duck <- BlackDuck
+
+scala> def funcWithFuncParam(x: Duck => Int) (y:Duck){
+     | x(y) }
+funcWithFuncParam: (x: Duck => Int)(y: Duck)Unit
+
+scala> def funcAnimal(x: Animal): Int = {8}
+funcAnimal: (x: Animal)Int
+
+scala> def funcDuck(x: Duck): Int = {8}
+funcDuck: (x: Duck)Int
+
+scala> def funcWhiteDuck(x: WhiteDuck): Int = {8}
+funcWhiteDuck: (x: WhiteDuck)Int
+
+scala> val f1 = funcWithFuncParam(funcAnimal) _
+f1: Duck => Unit = <function1>
+
+scala> f1(new Duck)
+scala> f1(new WhiteDuck)
+scala> f1(new BlackDuck) 
+#+END_SRC
+
+- 下届 和 上届
+
+通过对Function1定义的分析，知道下面的定义：
+#+BEGIN_SRC java -n -r
+class Queue[+T] 
+{
+    def enqueue(x: T) = {} (ref:enqueue) 
+}
+#+END_SRC
+第[[(enqueue)]]行会出现编译错误，因为函数参数是输入的一种方式，错误如下：
+#+BEGIN_SRC 
+error: covariant type T occurs in contravariant position in type T of value x
+       def enqueue(x: T) = {}
+                   ^
+#+END_SRC
+要解决这个问题，必须使用lower bounds技术，
+#+BEGIN_SRC java -n -r
+class Queue[+T] {
+    def enqueue[U>:T](x : U) = new Queue[U]()
+}
+
+class Fruit
+class Apple extends Fruit
+class Orange extends Fruit
+class Another
+}
+#+END_SRC
+语法为 *U >: T* 使得 enqueue的参数类型现在为 U，U 是 T 的超类型，保证
+不会出现运行时错误。例如上面的例子中，可以有如下使用:
+#+BEGIN_SRC java -n -r
+val q1 = new Queue[Fruit]
+    q1.enqueue(new Apple)
+    q1.enqueue(new Orange) (ref:orange)
+    q1.enqueue(new Another) (ref:another)
+#+END_SRC
+第 [[(orange)]], [[(another)]] 行，好像不对，经分析，Orange的超类为Fruit，
+Fruit是Fruit的超类，因此没有问题，而Another的超类为Any，Any为Fruit的超
+类，也符合条件。
+
+upper bounds 与下届类似，可以通过PinS page 444的一个例子：
+#+BEGIN_SRC java -n -r
+def orderedMergeSort[T <: Ordered[T]](xs: List[T]): List[T] = {
+#+END_SRC
+
+- 对象私有数据
+也是通过对Function1的定义，输入输出必须遵循正负位置，因此在定义类或
+trait，不能出现公共的可修改的变量(使用var定义的变量)，它会引起使用者的
+非法修改。如需要定义这样的变量，必须像如下一样定义：
+#+BEGIN_SRC java -r -n
+class Queue[+T] private (
+private[this] var leading: List[T],
+private[this] var trailing: List[T]
+) {}
+#+END_SRC
+使用了关键字 *private[this]* 。
+
+** 部分应用函数
+部分应用函数(Partially Applied function) 一个用在表达式中且缺少一些参
+数的函数，定义部分应用函数时，使用下划杠来完成。如一个函数f的类型为Int => Int => Int，那么 f 和 f(1) 是部分
+应用函数。
+#+BEGIN_SRC emacs-lisp -n -r
+scala> def sum(x: Int, y: Int, z: Int) = x + y + z
+sum: (x: Int, y: Int, z: Int)Int
+
+scala> val a = sum(2,_:Int,3)
+a: Int => Int = <function1>
+
+scala> val b = sum(2,_:Int,_:Int)
+a: (Int, Int) => Int = <function2>
+
+scala> val c = sum _
+c: (Int, Int, Int) => Int = <function3>
+
+#+END_SRC
+
+* 不同于Java的特点
+** object关键字
+- singleton object
+用object关键字定义的对象，称为singleton对象。每个singleton object有且
+只有一个实例。一个singleton object 与一个class拥有同样的名字，并且被定
+义在同一个源文件中，称为那个class的同伴对象(companion object)。这个
+class称为它的同伴类。一个没有同伴类的singleton object称为standalone
+object。
+
+与singleton object相关的是，在scala中没有静态成员。
+** by-name 参数
+是call-by-name的同义词，是一种求值策略，即函数的参数在函数被调用前并不
+求值，而是将整个参数代入进函数体中，如果参数x = function(5,6)，则整个
+代入，无论什么时候出现在函数中，都会对其进行重新求值。通过两个例子来说
+明其用途：
+示例一
+#+BEGIN_SRC emacs-lisp -n -r
+def myAssert(predicate: () => Boolean) = (ref:func)
+if (assertionsEnabled && !predicate())
+throw new AssertionError
+
+myAssert(() => 5 > 3)
+
+var assertionsEnabled = true
+def byNameAssert(predicate: => Boolean) = (ref:name)
+if (assertionsEnabled && !predicate) (ref:aname)
+throw new AssertionError
+
+myAssert(5 > 3)
+
+def boolAssert(predicate: Boolean) = (ref:value)
+if (assertionsEnabled && !predicate) (ref:avalue)
+throw new AssertionError
+
+myAssert(5 > 3)
+#+END_SRC
+说明: 要使用by-name参数，必须将line [[(func)]] 的 "() =>" 变成
+[[(name)]] 的 "=>"，前面是函数作为参数，后面是by-name参数
+
+现在比较line [[(name)]] 和 [[(value)]]，[[(avalue)]] 的 predicate，不管assertionsEnabled为
+true还是false，在执行myAssert()之前就执行了predicate的计算，但是line
+[[(aname)]] 则不会这样，它只在false的情况下，去执行predicate的求值，因
+此是惰性求值的体现。所以boolAssert()函数是有副作用的。
+
+示例2：
+一个通常的producer/consumer并发程序的缓冲区Drop的代码，producer将消息
+通过Drop.put()存入，consumer通过Drop.take()取出，具体的缓冲区为一个字
+符串变量message，为了并发带来的重复存入或取空，使用同步机制，将message
+存入和取出过程进行同步锁。来看Java和scala代码，可以带来怎么
+的区别。(代码来自[fn:5],为节省空间，删除了些注释和代码)
+Java:
+#+BEGIN_EXAMPLE emacs-lisp -n -r
+ class Drop 
+ { 
+  private String message; 
+  private boolean empty = true; 
+
+  private Object lock = new Object(); 
+
+  public String take() 
+  { 
+    synchronized(lock) 
+    { 
+      //Wait until message is available. 
+      while (empty)  (ref:take)
+      { 
+        try 
+        { 
+          lock.wait(); 
+        } 
+        catch (InterruptedException e) {} 
+      } 
+      //Toggle status. 
+      empty = true; 
+      //Notify producer that status has changed. 
+      lock.notifyAll(); 
+      return message; 
+    } 
+  } 
+
+  public void put(String message) 
+  { 
+    synchronized(lock) 
+    { 
+      //Wait until message has been retrieved. 
+      while (!empty)  (ref:put)  
+        { 
+          lock.wait(); 
+        } catch (InterruptedException e) {} 
+      } 
+      //Toggle status. 
+      empty = false; 
+      //Store message. 
+      this.message = message; 
+      //Notify consumer that status has changed. 
+      lock.notifyAll(); 
+    } 
+  } 
+ } 
+
+#+END_EXAMPLE
+Scala:
+#+BEGIN_SRC emacs-lisp -n -r
+  class Drop 
+  { 
+    var message : String = ""
+    var empty : Boolean = true 
+    var lock : AnyRef = new Object() 
+  
+    def put(x: String) : Unit = 
+      lock.synchronized 
+      { 
+        // Wait until message has been retrieved 
+        await (empty == true) (ref:put-wait)
+        // Toggle status 
+        empty = false 
+        // Store message 
+        message = x 
+        // Notify consumer that status has changed 
+        lock.notifyAll() 
+      } 
+
+    def take() : String = 
+      lock.synchronized 
+      { 
+        // Wait until message is available. 
+        await (empty == false) (ref:take-wait)
+        // Toggle status 
+        empty=true 
+        // Notify producer that staus has changed 
+        lock.notifyAll() 
+        // Return the message 
+        message 
+      } 
+
+    private def await(cond: => Boolean) = 
+      while (!cond) { lock.wait() } (ref:await)
+  }
+#+END_SRC
+对Java代码进行观察，发现有两段非常相似的代码分别在line [[(take)]] 和
+[[(put)]] 开始的while循环中，都是通过观察tempty的值来决定是否需要wait，
+并且条件刚好相反，并且每次循环都需要对empty进行重新求值，所以没有办法
+将这两段代码封装成一个函数。而Scala的代码，则可以做到这一点，理由是
+scala实现了call-by-name，line [[(put-wait)]] 和 [[(take-wait)]] 传进去
+的比较表达式，只有在 line [[(await)]] 的每次循环开始之前，才会对empty
+进行求值，正是这个每次求值empty，决定了这段代码的重用。如果将await函数
+改为：
+#+BEGIN_SRC emacs-lisp -n -r
+    private def await(cond: Boolean) = 
+      while (!cond) { lock.wait() } 
+#+END_SRC
+情况就不一样了，while循环的条件变成了固定值，要么永远为真，要么永远为
+假，无法达到预期的效果。
+
+[fn:1] Programming in Scala, 2nd Edition by Martin Odersky, Lex Spoon,
+and Bill Venners
+[fn:2] http://spark.apache.org/
+[fn:3] 模式匹配是检查被测标记序列是否出现在模式的某一部分中。
+[fn:4] Pattern Matching in Scala Michael Ruegg 2009
+[fn:5] http://www.ibm.com/developerworks/cn/java/j-scala02049.html
+[fn:6] http://stackoverflow.com/q/23308555/1054800
+

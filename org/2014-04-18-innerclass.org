@@ -1,0 +1,206 @@
+#+STARTUP: showall indent
+#+STARTUP: hidestars
+#+OPTIONS:   H:2 num:nil toc:nil \n:nil ::t |:t -:t f:t *:t <:t
+#+OPTIONS:   tex:t  d:nil todo:t pri:nil tags:not-in-toc
+#+BEGIN_HTML
+---
+category: computer science and enginneering
+layout: post
+title: "Inner Class and Nested Class in Java"
+tags: ["Language", Java]
+---
+{% include JB/setup %}
+
+#+END_HTML
+Java的内部类和嵌套类[fn:1]，可以声明为：private，protect，public或package
+private。 嵌套类静态的(static)和内部类非静态的(non-static)。
+它们是将它括在内的那个类(外围类)的成员。非静态内部类可以访问它的外围
+类的其它成员(即使是私有的)，静态类不能访问外围类的其它成员。
+
+通常将两类统称为内部类。
+* 访问和实例化
+- 静态嵌套类
+#+BEGIN_SRC java -n
+OuterClass.StaticNestedClass
+
+OuterClass.StaticNestedClass nestedObject =
+     new OuterClass.StaticNestedClass();
+#+END_SRC
+
+- 非静态内部类
+非静态嵌套类的实例只能存在外围类的实例中，因此要实例化它，必须先有外围
+类的实例
+#+BEGIN_SRC java -n
+OuterClass outerObject = new OuterClass();
+OuterClass.InnerClass innerObject = outerObject.new InnerClass();
+#+END_SRC
+
+* 匿名内部类
+Anonymous Inner Class的名字理解，创建一个类来实现一个接口时，如果这个
+类为top-level类，那么这个类肯定有名字，但是如果在一个类的内部，创建一
+个实现接口的类或继承类，则可以不给类起名字，那就是匿名的。另外，匿名内部类肯定
+是实现某一接口的类或继承某一父类的类。
+- 示例一 实现接口的匿名类
+#+BEGIN_SRC java -n
+public interface Contents {
+    public int value();
+}
+
+public class Parcel7 { （ref:parcel7)
+    public Contents contents() {
+	return new Contents(){
+	    private int i = 11;
+	    public int value() {return i;}
+	};
+    }
+
+    public static void main(String[] args) {
+	Parcel7 p = new Parcel7();
+	Contents c = p.contents();
+    }
+}
+#+END_SRC
+line [[(ref:parcel7)]] 的类定义等价于下面的代码：
+#+BEGIN_SRC java -n
+public class Parcel7 { （ref:parcel7)
+    public MyContents implements Contents {
+	    private int i = 11;
+	    public int value() {return i;}
+    }
+
+    public Contents contents() { return new MyContents(); }
+    public static void main(String[] args) {
+	Parcel7 p = new Parcel7();
+	Contents c = p.contents();
+    }
+}
+#+END_SRC
+
+- 继承父类的匿名类
+#+BEGIN_SRC java -n
+class Wrapping {
+    public int i = 11;
+    public Wrapping(int x) { i = x; }
+    public int value() {return i;} (ref:parent)
+}
+
+public class Parcel8 {
+    public Wrapping wrapping(int x) {
+	return new Wrapping(x) {
+	    public int value() {
+		return super.value() * 47; (ref:children)
+	    }
+	};
+    }
+}
+#+END_SRC
+line [[(ref:children)]] 的 super.value() 来自父类 line [[(ref:parent)]] 的
+value()
+
+- 为什么需要内部类
+最有说服力的理由： 每个内部类能独立地继承自一个实现。这样的话，内部类
+不会受到外围类是否已经继承了一个实现的限制。(意味着给多重继承(multiple-inheritance)提供了可
+能)
+#+BEGIN_SRC java -n
+class D {}
+abstract class E {}
+
+class Z extends D {
+    E makeE() { return new E() {};}
+}
+
+public class MultiImplementation {
+    static void takesD(D d) {}
+    static void takesE(E e) {}
+    public static void main(String[] args) {
+	Z z = new Z();
+	takesD(z);
+	takesE(z.makeE());
+    }
+}
+#+END_SRC
+
+- 内部类与闭包和回调
+闭包，也称词法闭包或函数闭包，是包含引用环境的一个函数或对一个函数的引
+用，其中引用环境为一个表，它存储着那个函数的每个非本地变量。不像普通的
+函数指针，一个闭包(即使在它的临时词法范围之外被调用)允许访问那些非本地
+变量。一方面，对于特定的编程语言来说，支持闭包意味着函数成为该编程语言
+的一等公民，可以构建高阶函数；另一方面，对闭包的理解可以帮助构建更符合
+面向对象思想的程序，如信息隐藏。
+
+对Java而言，内部类可以看成是一个面向对象(object-oriented)闭包，因为它
+不仅包含来自外部类对象的所有信息(指它被创建的程序范围)，而且它自动地持
+有一份指向外部类对象的引用，在那里，它有权控制所有成员，private成员也
+不例外。
+
+在Java中，是否要包含指针机制，最强烈的争议之一就是为了实现callback。
+有了回调机制，某一对象被给予一些信息(是指将回调对象作为参数存储起来)，
+这些信息允许该对象回调原始对象[fn:2][fn:3](具体而言，是原始对象的方法)。
+最后放弃实现指针，因为Java中有接口和内部类，足以更好的实现callback。
+#+BEGIN_SRC java -n
+interface Incrementable {
+    void increment();
+}
+
+class Callee1 implements Incrementable {
+    private int i = 0;
+    public void increment() {
+	i++;
+	System.out.println(i);
+    }
+}
+
+class MyIncrement {
+    public void increment() { System.out.println("Other operation");}
+    static void f(MyIncrement mi) { mi.increment(); }
+}
+
+class Callee2 extends MyIncrement {
+    private int i = 0;
+    public void increment() {
+	super.increment();
+	i++;
+	System.out.println(i);
+    }
+    private class Closure implements Incrementable {
+	public void increment() {
+	    Callee2.this.increment();
+	}
+    }
+
+    Incrementable getCallbackReference() {
+	return new Closure();
+    }
+}
+
+class Caller {
+    private Incrementable callbackReference;
+    Caller( Incrementable cbh) { callbackReference = cbh; }
+    void go() { callbackReference.increment();}
+}
+
+public class Callbacks {
+    public static void main(String[] args) {
+	Callee1 c1 = new Callee1();
+	Callee2 c2 = new Callee2();
+	MyIncrement.f(c2);
+	Caller caller1 = new Caller(c1);
+	Caller caller2 = new Caller(c2.getCallbackReference());
+	caller1.go();
+	caller1.go();
+	caller2.go();
+	caller2.go();
+    }
+}
+#+END_SRC
+
+
+[fn:1] http://docs.oracle.com/javase/tutorial/java/javaOO/nested.html
+[fn:2] 感觉wikipedia上的callback说的更清晰： a callback is a piece of
+executable code that is passed as an argument to other code, which is
+expected to call back (execute) the argument at some convenient time.
+一个callback是一段执行代码，给作为参数传递给其它代码，期望其它代码在将
+来某一时刻回调(执行)这段代码。而为什么用callback呢，因为先要将callback
+函数传递给调用者，后来再有调用者callback回来。
+[fn:3] 某一对象是caller，原始对象是callback
+

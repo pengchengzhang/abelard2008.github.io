@@ -1,0 +1,151 @@
+#+STARTUP: showall indent
+#+STARTUP: hidestars
+#+OPTIONS:   H:2 num:nil toc:nil \n:nil ::t |:t -:t f:t *:t <:t
+
+#+OPTIONS:   tex:t  d:nil todo:t pri:nil tags:not-in-toc
+#+BEGIN_HTML
+---
+category: computer science and enginneering
+layout: post
+title: "Notes of Git"
+Tags: [linux,tools,git]
+---
+{% include JB/setup %}
+
+#+END_HTML
+
+* 命令速记
+- git init
+- git add .    :递归的将当前目录下的所有内容添加到仓库
+- git commit -m "comments..." : 将git add添加的内容提交到仓库
+- git branch -r
+- git checkout -b 3dc9935 bloom/master
+- git ls-remote --heads origin
+- git ls-remote bloom | grep refs/heads/
+
+#+begin_example
+cd /gitcentor
+git clone --bare /study/doctor/cloudstorage/stream-process/bloom /gitcentor/bloom.git 
+ :This clone command copies the Git remote repository from /study/doctor/cloudstorage/stream-process/bloom to the current working directory, /gitcentor/.
+git remote add bloom /gitcentor/bloom  :git remote added a new remote section called origin to our configuration
+#+end_example
+
+- git push <仓库明> master 将本地内容提交到远程仓库
+- git 
+- git branch -r
+
+- git checkout -b 3dc9935 bloom/master
+- git ls-remote --heads origin
+- git ls-remote bloom | grep refs/heads/
+ 
+* creating one remote repository
+  In machine1, whose ip is 192.168.1.101 and user name borealis, it
+  has a directory nmstl. In machine2, whose ip is 192.168.1.106 and
+  user name abelard. 
+  I create one remote repository in machine2's directory
+  /research/git-center, and machine1 is nmstl's developing machine.
+
+  First, in machine1
+
+  #+BEGIN_SRC sh
+  cd ~/nmstl
+  git init
+  git add .
+  git commit -m "nmstl project"
+  #+END_SRC
+
+  Second, in machine2
+
+#+BEGIN_SRC sh
+cd /research/git-center
+git clone --bare borealis@192.168.1.106:~/nmstl nmstl-fc12-i386
+#+END_SRC
+
+  Third, in machine1, I get nmstl's newest version.
+#+BEGIN_SRC sh
+cd ~/test-nmstl-git
+git clone abelard@192.168.1.103:/research/git-center/nmstl
+#+END_SRC
+
+  Forth, after modifying.
+#+BEGIN_SRC sh
+git clone abelard@192.168.1.103:/research/git-center/nmstl
+git push origin master
+#+END_SRC
+  
+* commit only modified files
+#+BEGIN_SRC sh
+git diff --name-only --diff-filter=M | xargs git add
+#+END_SRC
+
+* 建立一个可以进行push的裸仓库(一般是在git服务器中构建)
+#+BEGIN_SRC sh
+	mkdir gitTest.git
+	cd gitTest.git
+	git init --bar
+#+END_SRC
+* 第一次向远程仓库push内容的操作
+#+BEGIN_SRC sh
+	mkdir gitTest
+	cd gitTest
+	touch Readme
+	git init
+	git add .
+	git commit -m "write some comments"
+	git remote add origin abelard@10.13.32.243:/path/gitTest.git
+	git push origin master
+#+END_SRC
+* 从远程仓库中克隆内容和提交更新
+#+BEGIN_SRC sh
+	git clone abelard@10.13.32.243:/path/gitTest.git
+	cd gitTest
+	touch newfile
+	git add newfile  #可以是目录，或文件路径
+	git commit -m "update version"
+	git push origin master
+#+END_SRC	
+
+* github 相关
+如果是第一次使用并且想创建public库，则需要登录github创建用户并且创建自己喜欢仓库。
+#+BEGIN_SRC sh
+## 创建ssh key ##
+	cd ~/.ssh
+	ssh-keygen -t rsa -C "your_email@example.com"
+	sudo yum install xclip
+	xclip -sel clip < ~/.ssh/id_rsa.pub
+#+END_SRC
+上面的操作在本地linux下完成，详细解释在[[https://help.github.com/articles/generating-ssh-keys][ssh-key]], 最后一个命令是将本地key的内容拷贝到剪贴板，然后登录github,找到SSH Key页面，选择Add an SSH Key，按ctrl+v拷贝到编辑框即可.
+- 测试ssh key 
+#+BEGIN_SRC sh
+	[abelard@abelard ~]$ ssh -T git@github.com
+	
+Hi pengchengzhang! You've successfully authenticated, but
+GitHub does not provide shell access.
+#+END_SRC
+- 遇到问题
+如果以上测试命令遇到如下问题：
+#+BEGIN_SRC sh
+Agent admitted failure to sign using the key.
+
+\# debug1: No more authentication methods to try.
+
+\# Permission denied (publickey).
+#+END_SRC
+执行：ssh-add 命令，应该能得到如下信息：
+#+BEGIN_SRC sh
+Identity added: /home/abelard/.ssh/id_rsa
+(/home/abelard/.ssh/id_rsa)
+#+END_SRC
+再重复以上测试命令，应该就ok了。
+
+- 上传项目有关的命令
+#+BEGIN_SRC sh
+	git init
+	git add .
+	git file -m "comments"
+	git remote add orign
+	git@github.com:pengchengzhang/bloom-chord.git
+	git push -u orign master 
+#+END_SRC
+最后两个命令必须是在以上测试没有问题的情况下进行。
+

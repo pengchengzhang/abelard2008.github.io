@@ -1,0 +1,26 @@
+#+STARTUP: showall indent
+#+STARTUP: hidestars
+#+OPTIONS:   H:2 num:nil toc:nil \n:nil ::t |:t -:t f:t *:t <:t
+
+#+OPTIONS:   tex:t  d:nil todo:t pri:nil tags:not-in-toc
+#+BEGIN_HTML
+---
+category: computer science and enginneering
+layout: post
+title: "Sumer gives me knowledge about language, framework, database"
+description: ""
+tags: [Rails]
+---
+
+#+END_HTML
+
+* ActiveRecord 
+query_method.rb  build_select for every select statement
+
+* [[https://github.com/ging/social_stream][social_stream]] platform used some libraries
+** inherit_sources
+
+* redirect_to does not return
+[[https://gist.github.com/jcasimir/1210155][Render and Redirect]]
+
+

@@ -1,0 +1,113 @@
+#+STARTUP: showall indent
+#+STARTUP: hidestars
+#+OPTIONS:   H:2 num:nil toc:nil \n:nil ::t |:t -:t f:t *:t <:t
+
+#+OPTIONS:   tex:t  d:nil todo:t pri:nil tags:not-in-toc
+
+#+BEGIN_HTML
+---
+category: computer science and enginneering
+layout: post
+title: "the Foundation of Storm"
+tags: ["Big data", "Storm"]
+---
+#+END_HTML
+
+* 宏定义
+storm 使用clojure DSL来定义各种宏，如defserverfn,defbolt,defspout, 然后使用这些宏来定义不同的服务，bolt和spout。
+
+#+BEGIN_SRC java
+## defserverfn
+
+	(defmacro defserverfn [name & body]
+		`(let [exec-fn# (fn ~@body)]
+			(defn ~name [& args#]
+				(try-cause
+					(apply exec-fn# args#)
+						(catch InterruptedException e#
+							(throw e#))
+						(catch Throwable t#
+							(log-error t# "Error on initialization of server " ~(str name))
+								(halt-process! 13 "Error on initialization")
+							)))))
+#+END_SRC
+
+
+
+- 分析：
+通常，在不同服务中，变化的是服务名称和处理函数组成，defserverfn接收用户的名称和处理程序，最后定义成一个带有异常处理逻辑(用户不必关心这些，并且通常都是一样
+的逻辑，将这些逻辑定义在宏里，使得代码结构更加简洁)的服务处理程序，[name & body] 就是用于这一目的，为了服务处理程序能接收参数，定义了 [& args] , 最后，用macroexpand，来看一个例子：
+#+BEGIN_SRC java
+	(macroexpand '(defserverfn service-handler [conf inimbus]
+		(.prepare inimbus conf (master-inimbus-dir conf))
+			(log-message "Starting Nimbus with conf " conf)
+				(let [nimbus (nimbus-data conf inimbus)]
+					(cleanup-corrupt-topologies! nimbus)
+						(doseq [storm-id (.active-storms (:storm-cluster-state nimbus))]
+							(transition! nimbus storm-id :startup))
+								(schedule-recurring (:timer nimbus)
+									0
+										(conf NIMBUS-MONITOR-FREQ-SECS)
+											(fn []
+												(when (conf NIMBUS-REASSIGN)
+													(locking (:submit-lock nimbus)
+														(mk-assignments nimbus)))
+															(do-cleanup nimbus)
+														))
+													;; Schedule Nimbus inbox cleaner
+														(schedule-recurring (:timer nimbus)
+															0
+																(conf NIMBUS-CLEANUP-INBOX-FREQ-SECS)
+																	(fn []
+																		(clean-inbox (inbox nimbus) (conf NIMBUS-INBOX-JAR-EXPIRATION-SECS))
+																		)))))
+																	
+     (let* [exec-fn__1559__auto__ (clojure.core/fn [conf inimbus]
+	 (.prepare inimbus conf (master-inimbus-dir conf)) 
+	 (log-message "Starting Nimbus with conf " conf) 
+	 (let [nimbus (nimbus-data conf inimbus)]
+	 (cleanup-corrupt-topologies! nimbus) 
+	 (doseq [storm-id (.active-storms (:storm-cluster-state nimbus))] 
+	 (transition! nimbus storm-id :startup)) (schedule-recurring
+	 (:timer nimbus) 0 (conf NIMBUS-MONITOR-FREQ-SECS) 
+	 (fn [] (when (conf NIMBUS-REASSIGN) (locking (:submit-lock
+	 nimbus) 
+	 (mk-assignments nimbus))) (do-cleanup nimbus)))
+	 (schedule-recurring (:timer nimbus) 0 
+	 (conf NIMBUS-CLEANUP-INBOX-FREQ-SECS) (fn [] (clean-inbox (inbox
+	 nimbus) 
+	 (conf NIMBUS-INBOX-JAR-EXPIRATION-SECS))))))] 
+	 (clojure.core/defn service-handler [& args__1560__auto__] 
+	 (backtype.storm.util/try-cause (clojure.core/apply
+	 exec-fn__1559__auto__ args__1560__auto__) 
+	 (catch java.lang.InterruptedException e__1561__auto__ (throw
+	 e__1561__auto__)) 
+	 (catch java.lang.Throwable t__1562__auto__
+	 (backtype.storm.log/log-error t__1562__auto__ 
+	 "Error on initialization of server " "service-handler") 
+	 (backtype.storm.util/halt-process! 13 "Error on initialization")))))
+#+END_SRC
+从展开结果可以看出，service-handler得到一个类似于
+#+BEGIN_SRC java
+	 (let [...] (defn ...))
+#+END_SRC	 
+的语句，因此最后返回的是一个server-handle函数，调用该函数时，要求输入
+参数(注意*args__1560__auto__*)。
+
+* 如何在nrepl下调用storm的clojure定义
+在emacs的shell下，进入storm的project.clj, 所在的根目录，该目录包含src，
+使用M-x nrepl-jack-in，打开repl-server，在提示符下导入需要的定义文件，
+比如，想要得到defserverfn定义。
+#+BEGIN_SRC sh
+	cd
+	/study/doctor/cloudstorage/stream-process/storm/storm-source3/storm
+	[abelard@localhost storm]$ ls
+	bin	     classes  LICENSE.html  NOTICE    pom.xml	      project.clj      src		      stormlib	test
+	CHANGELOG.md  conf     logback	     nrepl.el  #project.clj#  README.markdown  storm-0.9.0-wip16.zip  target	TODO
+	
+	user> (use '[backtype.storm.daemon.common])
+#+END_SRC
+就可以使用common中的定义了
+	
+	
+	

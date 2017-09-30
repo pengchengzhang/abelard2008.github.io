@@ -1,0 +1,58 @@
+#+STARTUP: showall indent
+#+STARTUP: hidestars
+#+OPTIONS:   H:2 num:nil toc:nil \n:nil ::t |:t -:t f:t *:t <:t
+
+#+OPTIONS:   tex:t  d:nil todo:t pri:nil tags:not-in-toc
+#+BEGIN_HTML
+---
+layout: post
+category: computer science and enginneering
+title: "emacs knowledge"
+description: ""
+tags: ["tools"]
+---
+{% include JB/setup %}
+
+#+END_HTML
+* C-u M-! <shell-command>
+which runs the same shell-command function, and also inserts the
+output back at the point in the current buffer. 
+
+* Rectangles
+[[http://www.delorie.com/gnu/docs/emacs/emacs_68.html][emacs manual's Rectangle operators]]
+
+* Keyboard Macros
+举例： 将下面的列宽增加3个空格
+#+BEGIN_SRC sh
+-rwxrwxr-x. 1 abelard abelard_signal
+-rw-rw-r--. 1 abelard abelard_signal.c
+-rwxrwxr-x  1 abelard abelardt
+-rw-rw-r--. 1 abelard abelardbuteTest.c
+drwxrwxr-x  3 abelard abelard
+#+END_SRC
+
+步骤：
+
+- `C-x (’ or <f3> 定一个kbd宏
+- 'C-s 空格 搜索空格，光标将停在第1行的‘1’字符上
+- 移动光标，让其停在最后一行‘3’的前面
+- 'C-x r t RET 3spaces RET， 将得到第1列和第2列之间增加3个空格
+- 将光标停在第1行的‘1’上
+- `C-x )’ or <f4>– 停止定义kbd宏
+- 将光标停在第1行的‘1’右侧的空格上，执行C-x e, 将在2和3列之间增加3 空格
+- 移动光标到第3列右侧的空格上，执行C-x e
+
+#+BEGIN_SRC sh
+-rwxrwxr-x.   1   abelard   abelard_signal
+-rw-rw-r--.   1   abelard   abelard_signal.c
+-rwxrwxr-x    1   abelard   abelardt
+-rw-rw-r--.   1   abelard   abelardbuteTest.c
+drwxrwxr-x    3   abelard   abelard
+#+END_SRC
+
+* useful functions
+
+- M-x imenu jump to function definition
+- M-x occur given an regex, it will create a new buffer with each
+  match in the current buffer
+- C-x C-x go back to where you were

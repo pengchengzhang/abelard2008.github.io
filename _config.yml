@@ -8,7 +8,7 @@ future: true
 paginate_path: /blog/page/:num
 description: 彭成章个人博客 
 url: http://abelard2008.github.io
-gems:
+plugins:
   - jekyll-sitemap
   - jekyll-paginate
   - jekyll-redirect-from

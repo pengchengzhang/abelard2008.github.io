@@ -1,0 +1,42 @@
+#+STARTUP: showall indent
+#+STARTUP: hidestars
+#+OPTIONS:   H:2 num:nil toc:nil \n:nil ::t |:t -:t f:t *:t <:t
+
+#+OPTIONS:   tex:t  d:nil todo:t pri:nil tags:not-in-toc
+
+#+BEGIN_HTML
+---
+category: computer science and enginneering
+layout: post
+title: "General Knowledge of Linux Kernel "
+tags: ["linux","linux kernel", Makefile]
+---
+#+END_HTML
+
+* .vmlinux.lds.cmd 怎么来的
+由下面几个文件中的相关内容可以知道，以2.6.34.13为例
+#+BEGIN_SRC sh
+scripts/Makefile.build
+
+	317 # Linker scripts preprocessor (.lds.S -> .lds)
+	318 # --------------------------------------------------------------------------    -
+	319 quiet_cmd_cpp_lds_S = LDS pengcz   $@
+	320     cmd_cpp_lds_S = $(CPP) $(cpp_flags) -P -C -U$(ARCH) \
+	321                              -D__ASSEMBLY__ -DLINKER_SCRIPT -o $@ $<
+	322 
+	323 $(obj)/%.lds: $(src)/%.lds.S FORCE
+	324         $(call if_changed_dep,cpp_lds_S)
+#+END_SRC
+这里还不能看到会生成*.cmd文件，需要看*if_changed_dep*的定义
+#+BEGIN_SRC sh
+scripts/Kbuild.include
+
+	214 # Execute the command and also postprocess generated .d dependencies file.
+	215 if_changed_dep = $(if $(strip $(any-prereq) $(arg-check) ),                  \
+	216         @set -e;                                                             \
+	217         $(echo-cmd) $(cmd_$(1));                                             \
+	218         scripts/basic/fixdep $(depfile) $@ '$(make-cmd)' > $(dot-target).tmp;\
+	219         rm -f $(depfile);                                                    \
+	220         mv -f $(dot-target).tmp $(dot-target).cmd)  
+#+END_SRC
+注：(1) 217行的 *cmd_$(1)* 用户参数替换，因此当执行前面214行的 *$(callif_changed_dep,cpp_lds_S)* 后，*cmd_$(1)* 变成了 *cmd_cpp_lds_S (2)220行生成.vmlinux.lds.S (3) if_changed_dep是一个公共变量或称为函数，不仅用在这里，还用在内核编译的其它许多地方。

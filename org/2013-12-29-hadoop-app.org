@@ -1,0 +1,225 @@
+#+STARTUP: showall indent
+#+STARTUP: hidestars
+#+OPTIONS:   H:2 num:nil toc:nil \n:nil ::t |:t -:t f:t *:t <:t
+
+#+OPTIONS:   tex:t  d:nil todo:t pri:nil tags:not-in-toc
+
+#+BEGIN_HTML
+---
+category: computer science and enginneering
+layout: post
+title: "How to build a Application with Hadoop"
+tags: ["Big data", "Hadoop", Eclipse]
+---
+#+END_HTML
+
+* 使用eclipse编写hadoop应用程序
+ - 下载[[http://code.google.com/p/hadoop-eclipse-plugin/downloads/list][eclipse plugin for hadoop]] 名称为hadoop-0.20.3-dev-eclipse-plugin.jar
+    放到，eclipse的 eclipse/plugins/目录下，重启eclipse后，在
+    file->new->project里，就可以看到map/reduce project
+
+ - 打开 Window->Preferences,找到 Hadoop Map/Reduce,设置Hadoop
+    Installation Directory 为eclipse的主目录如：
+    /home/abelard/hadoop-0.20.203.0
+
+#+BEGIN_HTML
+<div class="photofloatr">
+  <p><img src="/images/hadoop-preferences.png" width="500"
+    height="350" alt="hadoop-preferences.png"></p>
+  <p>设置Preferences for hadoop</p>
+</div>
+#+END_HTML
+
+ - 为了运行hadoop 的 map/reduce 程序，需要先运行hadoop，然后设置
+    Hadoop Locations, 打开 Window->Show View -> others，找到
+    Map/Reduce locations
+#+BEGIN_HTML
+<div class="photofloatr">
+  <p><img src="/images/Hadoop-locations.png" width="500"
+    height="350" alt="Hadoop-locations.png"></p>
+  <p>Hadoop locations</p>
+</div>
+#+END_HTML
+
+点击图 /hadoop locations/ 右上角的 Edit Hadoop location 或 New Hadoop
+location 则打开
+
+#+BEGIN_HTML
+<div class="photofloatr">
+  <p><img src="/images/edit-hadoop-location.png" width="500"
+    height="350" alt="edit-hadoop-location.png"></p>
+  <p>edit hadoop location</p>
+</div>
+#+END_HTML
+
+在图 /edit hadoop location/ 注意 左边的map/reduce端口来自
+mapred-site.xml，右边的hdfs端口来自core-site.xml
+
+ - 创建map/reduce工程，运行时，点击 Run as -> Run on Hadoop,就可以了
+* 如何开始hadoop的运行
+- 准备工作：如果要使用真实的分布式，首先将master节点设置成
+   DNS服务器，并将其起动。[[file://study/doctor/note/org/linux-system-management.org][DNS服务器设置]]
+- 解压hadoop压缩文件hadoop-0.20.203.0rc1.tar.gz
+- 进入hadoop主目录，修改conf目录下的配置文件：
+hadoop-env.sh
+#+begin_example
+export JAVA_HOME=/software/spring-mvc/jdk1.7.0_01/
+
+#+end_example
+core-site.xml
+#+begin_example
+<configuration>
+  <property>
+    <name>fs.default.name</name>
+    <value>hdfs://dillon.cloud:9005</value>
+  </property>
+<property>
+<name>hadoop.tmp.dir</name>
+<value>/home/abelard/hadoop-tmp</value>
+</property>
+</configuration>
+#+end_example
+
+mapred-site.xml
+#+begin_example
+<configuration>
+     <property>
+         <name>mapred.job.tracker</name>
+         <value>dillon.cloud:9001</value>
+     </property>
+</configuration>
+#+end_example
+
+hdfs-site.xml
+#+begin_example
+<configuration>
+  <property>
+    <name>dfs.replication</name>
+    <value>2</value>
+  </property>
+  <property>
+    <name>dfs.name.dir</name>
+    <value>/home/abelard/namenode</value>
+  </property>
+  <property>
+    <name>dfs.data.dir</name>
+    <value>/home/abelard/datanode</value>
+  </property>
+
+</configuration>
+#+end_example
+- 配置 SSH 的无密码公钥认证
+  如果要使用真实的分布式系统，需要将所有master和slave节点，
+  都设成无密码公钥认证，并且将自己的认证文件authorized_keys
+  文件，添加到所有节点(包括自己)的authorized_keys中。
+  + 单个节点自己的配置操作过程  参考：[[file://study/doctor/note/org/linux-system-management.org][linux系统管理]]
+  + 远程节点无密登录的设置：将自己的认证文件authorized_keys，
+     添加到远程节点的authorized_keys.
+- 运行命令序列
+#+begin_example
+[abelard@dillon hadoop-0.20.203.0]$ bin/hadoop namenode -format
+[abelard@dillon hadoop-0.20.203.0]$ bin/start-all.sh 
+starting namenode, logging to /home/abelard/hadoop-0.20.203.0/bin/../logs/hadoop-abelard-namenode-abelard.localdomain.out
+10.13.32.243: starting datanode, logging to /home/abelard/hadoop-0.20.203.0/bin/../logs/hadoop-abelard-datanode-abelard.localdomain.out
+abelard.localdomain: starting secondarynamenode, logging to /home/abelard/hadoop-0.20.203.0/bin/../logs/hadoop-abelard-secondarynamenode-abelard.localdomain.out
+starting jobtracker, logging to /home/abelard/hadoop-0.20.203.0/bin/../logs/hadoop-abelard-jobtracker-abelard.localdomain.out
+10.13.32.243: starting tasktracker, logging to /home/abelard/hadoop-0.20.203.0/bin/../logs/hadoop-abelard-tasktracker-abelard.localdomain.out
+[abelard@dillon hadoop-0.20.203.0]$ bin/stop-all.sh 
+stopping jobtracker
+10.13.32.243: stopping tasktracker
+stopping namenode
+10.13.32.243: stopping datanode
+abelard.localdomain: stopping secondarynamenode
+//通过start-all.sh和stop-all.sh的结果消息，可以看出，启动是
+否正常，依据不正常的消息，去查看log目录下的具体信息来解决。
+[abelard@dillon hadoop-0.20.203.0]$ bin/hadoop fs -ls //使用
+hdfs文件系统命令
+[abelard@dillon hadoop-0.20.203.0]$ bin/hadoop fs -put
+./conf/*.xml input
+[abelard@dillon hadoop-0.20.203.0]$ bin/hadoop jar hadoop-examples-*.jar grep input output 'dfs[a-z.]+'
+#+end_example
+
+
+- 查看运行结果
+在浏览器中输入：
+#+begin_example
+http://192.168.0.88:50030  //mapreduce work
+http://192.168.0.88:50070  //hdfs
+#+end_example
+有任何错误看logs目录下的:
+hadoop-abelard-namenode-dillon.cloud.log
+hadoop-abelard-datanode-dillon.cloud.log
+
+- 测试例子命令序列
+#+begin_example
+bin/hadoop jar hadoop-examples-*.jar grep input output 'dfs[a-z.]+'
+#+end_example
+常见异常：
+如hadoop-abelard-datanode-abelard.localdomain.log中的
+2013-01-30 20:44:08,779 ERROR
+org.apache.hadoop.hdfs.server.datanode.DataNode:
+java.io.IOException: Incompatible namespaceIDs in
+/home/abelard/datanode: namenode namespaceID = 1811935815;
+datanode namespaceID = 1837173423
+这种不兼容的问题，是hdfs的格式化一个已有的文件系统造成的，将
+前面core-site.xml和hdfs-site.xml所配置的目录为：datanode和
+namenode全部删除后，重新格式化即可。
+#+begin_example
+[abelard@dillon hadoop-0.20.203.0]$ bin/hadoop namenode -format
+#+end_example
+所创键的目录全部删除，重新创建，根据
+
+* MapReduce概念
++ MapReduce是一个对大规模数据进行分布式计算的编程模型，并且是一个在由
+  商业服务器构成的集群上进行大规模数据处理的执行框架。它是按照几十年
+  来，在并行和分布式处理中的著名原理来构建的。
+* Hadoop中的技术
++ 不一样的代码片段
+
+#+begin_example
+//org.apache.hadoop.mapred.MapTask
+Class<? extends CompressionCodec> codecClass = null;
+    if (conf.getCompressMapOutput()) {
+        codecClass = conf.getMapOutputCompressorClass(DefaultCodec.class);
+}
+#+end_example
+这样定义变量想让codecClass可以赋值为CompressionCodec的子类实例。
+
+* Hadoop中的进程启动
+  在执行start-all.sh时，启动了几个独立的进程，他们是：
++ org.apache.hadoop.hdfs.server.namenode.NameNode 
++ org.apache.hadoop.hdfs.server.datanode.DataNode
++ org.apache.hadoop.hdfs.server.namenode.SecondaryNameNode
++ org.apache.hadoop.mapred.JobTracker
++ dillon.cloud: org.apache.hadoop.mapred.TaskTracker
+
+* 最近主要看了哪些文章，有什么收获
++ hadoop definitive guide 从实践的角度，讨论怎么使用hadoop来进行大规模
+  数据分析；hadoop实现的 streaming I/O，让用户可以通过不同的编程语言实
+  现map和reduce功能，如附录C使用shell；书中详细讨论了各种参数的使用情
+  景。
++ Data-Intensive Text Processing with MapReduce 介绍hadoop中的
+  MapReduce结构如何实现，比较系统和深入。采用模式的方式讨论MapReduce的
+  使用场景，非常值得研究，因此对其中的很多模式，在
+  http://lintool.github.com/Cloud9/ 中设计的相应的例子，以供学习。
+
++ berley的HOP，为了hadoop的MapReduce能适应于real-time的大规模数据分析，修
+  改了hadoop，主要亮点是将hadoop原来的pull方式改为push方式，来将mapper结
+  果传递到reducer中；另外，使用了pipeline技术。
+
++ google的percolator，为解决大规模数据集的实时部分更新，提出用基于增量
+  处理来代替基于批量的索引。
+
++ 经典的流处理引擎之一Borealis，是一个分布式的流处理引擎，在Aurora的基
+  础上构建，主要解决动态更新查询结果和修改查询条件。
+
++ Continuous Analytics, online aggregation,都是实时mapreduce的例子，所
+  采用的方法(1)修改hadoop (2) 在新设计的mapreduce平台Hyracks上实现。
+
++ Hyracks是一个新的mapreduce平台，为了解决hadoop中很多的不足，它采用了
+  在1990年WISC的GAMMA并行数据库的思想，加上1997年发表的操作树模型来进
+  行block依赖的管理。另外在架构上使用cluster controller 和 node
+  controller的方式，使用Overlog来实现Cluster controller的处理逻辑。
+
+
+
