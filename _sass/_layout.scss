@@ -3,7 +3,10 @@ $sidebar-width:130px;
 $sidebar-speed:.3s;
 
 body {
-  background-color: #fff;
+    background-color: #fff;
+    .p {
+        padding-top: 54px;
+    }
 }
 
 .container{
@@ -50,6 +53,9 @@ font-size: 51px;
   padding-left:0px;
 }
 
+p{
+  margin:0px 0px 5px 0px;
+}
 .main-sidebar{
   display: block;
   float: left; 
@@ -126,14 +132,17 @@ pre,
 code {
   white-space: pre;
   display: inline-block;
-  margin: 0;
+  margin: 0px 0px 0px 0px;
   font: 14px/1.8em Menlo, Consolas, "Courier New", Courier, "Liberation Mono", monospace;
-  padding: 0 1px 0 10px;
-  border-left: 2px dotted #cd5c5c;
+  padding: 0 1px 0 15px;
+  //border-left: 2px dotted #cd5c5c;
 }
 
 @media (min-width: 618px) {
-  pre, code { font-size: 16px; }
+    pre, code {
+        font-size: 16px;
+        color: white;
+    }
 }
 
 .highlight,
@@ -144,20 +153,20 @@ li > code,
 li> pre,
 h5 > code,
 .note > code {
-//  background-color: #2b2b2b;
+  background-color: #2b2b2b;
   color: #fff;
   max-width: 850px;
   overflow-x: auto;
   vertical-align: middle;
-//  @include border-radius(5px);
-//  @include box-shadow(inset 0 1px 10px rgba(0,0,0,.3),
-  //  0 1px 0 rgba(255,255,255,.1),
-    //0 -1px 0 rgba(0,0,0,.5));
+  @include border-radius(5px);
+  @include box-shadow(inset 0 1px 10px rgba(0,0,0,.3),
+  0 1px 0 rgba(255,255,255,.1),
+  0 -1px 0 rgba(0,0,0,.5));
 }
 
 .note code {
-//  background-color: #333;
- // background-color: rgba(0,0,0,0.2);
+  background-color: #333;
+  background-color: rgba(0,0,0,0.2);
   margin-left: 2.5px;
   margin-right: 2.5px;
   font-size: 0.8em;
@@ -169,16 +178,15 @@ h5 > code,
 }
 
 .highlight {
-  margin: 1em 0;
-  padding: 10px 0;
   width: 100%;
   overflow: auto;
 }
 
+
 .highlighter-rouge .highlight {
   @extend .highlight;
   margin: 0;
-  padding: 10px 0.5em;
+  padding: 0px 0px 0px 15px;
 }
 
 // @include responsive($small-break) {

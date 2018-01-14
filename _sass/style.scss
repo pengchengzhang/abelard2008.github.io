@@ -17,8 +17,8 @@
 @import "type";
 @import "media";
 @import "links";
-@import "tables";
-@import "forms";
+//@import "tables";
+//@import "forms";
 @import "notifications";
 @import "other";
 
@@ -30,7 +30,8 @@
 @import "nav";
 @import "blog";
 @import "about";
-@import "syntax";
+@import "pygments";
+//@import "syntax";
 
 // Additional styles to think about
 @import "responsive";

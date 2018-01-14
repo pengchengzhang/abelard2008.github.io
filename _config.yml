@@ -1,6 +1,5 @@
 name: 彭成章 
 markdown: kramdown
-highligher: rouge
 baseurl: 
 permalink: /:title/
 paginate: 10
@@ -8,15 +7,11 @@ future: true
 paginate_path: /blog/page/:num
 description: 彭成章个人博客 
 url: http://abelard2008.github.io
+sass:
+  style: compressed
 plugins:
   - jekyll-sitemap
   - jekyll-paginate
   - jekyll-redirect-from
-sass:
-  sass_dir: _sass
-  style: compressed
-kramdown:
-    highlighter: rouge
-    syntax_highlighter_opts:
-        block:
-            line_numbers: true
+
+
