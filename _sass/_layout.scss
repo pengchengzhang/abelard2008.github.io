@@ -4,9 +4,6 @@ $sidebar-speed:.3s;
 
 body {
     background-color: #fff;
-    .p {
-        padding-top: 54px;
-    }
 }
 
 .container{
@@ -54,7 +51,7 @@ font-size: 51px;
 }
 
 p{
-  margin:0px 0px 5px 0px;
+  margin:0px 18px 5px 0px;
 }
 .main-sidebar{
   display: block;
@@ -153,8 +150,8 @@ li > code,
 li> pre,
 h5 > code,
 .note > code {
-  background-color: #2b2b2b;
-  color: #fff;
+    background-color: #585151;//#2b2b2b;
+  color: #fff2e7;
   max-width: 850px;
   overflow-x: auto;
   vertical-align: middle;
