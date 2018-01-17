@@ -51,7 +51,8 @@ font-size: 51px;
 }
 
 p{
-  margin:0px 18px 5px 0px;
+    margin:0px 18px 5px 0px;
+        letter-spacing: 1px;
 }
 .main-sidebar{
   display: block;
@@ -170,7 +171,7 @@ h5 > code,
 }
 
 .code-block {
-  margin: 10px 0;
+//  margin: 10px 0;
   //code { background: none; }
 }
 
