@@ -9,7 +9,7 @@ comments: []
 ---
 
 书中一些例子直接在*cider-repl*中敲入并不能得到想要的结果,形成文件，存入[programming-clojure-2nd](https://github.com/abelard2008/programming-clojure-2nd)项目中。
-### 如何完整运行*6.4 Datatypes*中p155 *(gulp vault)*
+### *6.4 Datatypes*中*(gulp vault)* p155
 - *6.3 Protocols*最后的示例代码存入
 [io.clj](https://github.com/abelard2008/programming-clojure-2nd/blob/master/chapter6/io.clj),
 跟书上略有区别的是，为了与
