@@ -32,6 +32,14 @@
 
 </script>
 
+<script type="text/javascript" src="{{ site.baseurl }}/js/google-code-prettify/prettify.js"></script>
+<script type="text/javascript" src="{{ site.baseurl }}/js/jquery-2.2.4.min.js"></script>
+<script type="text/javascript">
+ $(function(){
+     $("pre").addClass("highlight prettyprint linenums").attr('style', 'overflow:auto');//.wrap("<div class='language-javascript highlighter-rouge'></div>");
+     window.prettyPrint && prettyPrint();
+ });
+</script>
 
 </body>
 </html>

@@ -84,14 +84,14 @@ p {
 }
 
 pre{
-//  background-color:#272822;
+//    background-color: white;
   padding:20px;
   overflow-x:auto;
   font-size:16px;
   word-break:break-all;
   word-wrap:break-word;
   white-space:pre-wrap;
-  color:#333;
+  color:black;
   // @include border-radius($br);
   font-family:"Courier New", monospace;
   // border:1px solid darken(whitesmoke,20%);
@@ -104,13 +104,13 @@ pre{
 }
 
 .highlight{
-  margin-right:-20px;
-  margin-left:-20px;
+//  margin-right:-20px;
+//  margin-left:-20px;
   position:relative;
 }
 
 code{
-  background:#272822;
+  background:#FFFFFF;
 //  color:#fff;
   // @include border-radius(3px);
   font-family:"Courier New", monospace;

@@ -11,13 +11,13 @@
 
   <meta name="viewport" content="width=device-width">
   <link rel="stylesheet" href="{{ site.baseurl }}/css/style.css" media="screen">
-
+  <link rel="stylesheet" href="{{ site.baseurl }}/js/google-code-prettify/prettify.css" media="screen">
   
   <!--[if lt IE 9]> <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script> <![endif]-->
 
 </head>
 
-<body class="{{ page.body }}">
+<body onload="PR.prettyPrint()" class="{{ page.body }}">
 
 {% include svg.html %}
 
@@ -37,3 +37,4 @@
   </div>
   <div class="container" id="container">
     <article class="main-article" id="main-article">
+
