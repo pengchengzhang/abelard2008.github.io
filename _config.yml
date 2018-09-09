@@ -2,7 +2,7 @@
 #   Main Configs   #
 # ---------------- #
 baseurl:
-url: https://abelard2008.github.org
+url: https://abelard2008.github.io
 date_format: "ordinal"
 title: 程序员
 subtitle: "成为更好的程序员"
