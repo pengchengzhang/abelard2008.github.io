@@ -9,6 +9,7 @@ subtitle: "成为更好的程序员"
 description: "彭成章的个人博客"
 keywords: Dillon Peng, abelard2008 
 timezone: Asia/Xi'an
+future: true
 encoding: "utf-8"
 side_bar_repo_limit: 5
 github: [metadata]

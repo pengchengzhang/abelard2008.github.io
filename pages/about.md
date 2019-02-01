@@ -8,12 +8,10 @@ menu: 关于
 permalink: /about/
 ---
 
-我是马壮，码而生，码而立。
+Programming requires two kinds of knowledge: understanding the nature of computation, and discovering the lexicon, features, and idiosyncrasies of a particular programming languare.
 
-仰慕「优雅编码的艺术」。
 
-坚信熟能生巧，努力改变人生。
-
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ---- A Little Java A Few Patterns
 ## 联系
 
 {% for website in site.data.social %}
