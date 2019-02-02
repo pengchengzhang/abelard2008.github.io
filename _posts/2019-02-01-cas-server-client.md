@@ -8,11 +8,16 @@ date: Fri Feb  1 16:05:42 CST 2019
 comments: []
 ---
 
-本文的参考为[CAS之 5.2x版本配置数据库认证-yellowcong](https://blog.csdn.net/yelllowcong/article/details/78808607)和[CAS 5.2.x 单点登录 - 搭建服务端和客户端](https://segmentfault.com/a/1190000013844049), 以及另一个同事的项目代码. 其它参考:
+本文的实践代码已上传到github, 地址为: [abelard2008/cas-5.2-server-client](https://github.com/abelard2008/cas-5.2-server-client)
+
+ 本文的参考为[CAS之 5.2x版本配置数据库认证-yellowcong](https://blog.csdn.net/yelllowcong/article/details/78808607)和[CAS 5.2.x 单点登录 - 搭建服务端和客户端](https://segmentfault.com/a/1190000013844049), 以及另一个同事的项目代码. 其它参考:
 
 (1) [WAR Overlay Installation](https://apereo.github.io/cas/5.0.x/installation/Maven-Overlay-Installation.html)
+    
 (2) [CAS Properties](https://apereo.github.io/cas/5.2.x/installation/Configuration-Properties.html)
 
+这里没有讨论keystore等有关内容. 
+    
 # 版本
 * CAS 5.2.6 
 * JDK openjdk version 1.8.0\_191
@@ -132,3 +137,64 @@ comments: []
        cas-server-support-json-service-registry-5.2.6.jar
        mysql-connector-java-8.0.11.jar
 重启<strong>tomcat</strong>后, 就可以使用mysql中的用户名和密码登录了.
+
+# 客户端
+
+根据参考资料下载[cas-sample-java-webapp](https://github.com/cas-projects/cas-sample-java-webapp), 由于原项目的web server使用了jetty, 并且没有一次弄成功, 最后改成了很多博客中的<strong>tomcat</strong>,
+
+1. 将主目录下<strong>pom.xml</strong>的:
+
+         <plugin>
+              <groupId>org.eclipse.jetty</groupId>
+              <artifactId>jetty-maven-plugin</artifactId>
+              <version>9.3.6.v20151106</version>
+              <configuration>
+                  <jettyXml>${basedir}/etc/jetty/jetty.xml,${basedir}/etc/jetty/jetty-ssl.xml,${basedir}/etc/jetty/jetty-https.xml</jettyXml>
+                  <systemProperties>
+                      <systemProperty>
+                          <name>org.eclipse.jetty.annotations.maxWait</name>
+                          <value>300</value>
+                      </systemProperty>
+                  </systemProperties>
+                  <webApp>
+                      <contextPath>/sample</contextPath>
+                      <overrideDescriptor>${basedir}/etc/jetty/web.xml</overrideDescriptor>
+                  </webApp>
+                  <jvmArgs>-Xdebug -Xrunjdwp:transport=dt_socket,address=5002,server=y,suspend=n</jvmArgs>
+                </configuration>
+        </plugin>
+    
+改成:
+
+        <plugin>
+           <groupId>org.apache.tomcat.maven</groupId>
+           <artifactId>tomcat7-maven-plugin</artifactId>
+           <version>2.2</version>
+           <configuration>
+                <port>8181</port>
+                <url>http://localhost:8080/manager/text</url>
+                <uriEncoding>UTF-8</uriEncoding>
+                <server>tomcat</server>
+                <path>/sample</path>
+          </configuration>
+       </plugin>
+
+2. src/main/webapp/WEB-INF/web.xml的修改
+    
+根据<strong>1</strong>的配置, 访问该web服务的url为<strong>http://10.10.1.212:8181/sample</strong>, 因此所有在该使用到这个客户端的weburl都改成<strong>http://10.10.1.212:8181/sample</strong>, 另外, 通过上面服务器的配置和访问知道, CAS 服务器的登录访问地址为: <strong>http://10.10.1.212:8080/cas</strong> 和 <strong>http://10.10.1.212:8080/cas/login</strong>, 因此在这个Web.xml, 改成相应的url. 完成修改保存之后, 使用
+
+        [root@localhost cas-sample-java-webapp]# mvn tomcat7:run
+        ......
+        [INFO] --- tomcat7-maven-plugin:2.2:run (default-cli) @ cas-sample-java-webapp ---
+        [INFO] Running war on http://localhost:8181/sample
+        [INFO] Creating Tomcat server configuration at /develop/remote-info/handover-from/cas-5.2-server-client/cas-sample-java-webapp/target/tomcat
+        [INFO] create webapp with contextPath: /sample
+        ......
+        SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+        Feb 02, 2019 5:46:22 PM org.apache.coyote.AbstractProtocol start
+        INFO: Starting ProtocolHandler ["http-bio-8181"]
+
+ 3. 运行结果
+在浏览器的url地址栏输入<strong>http://10.10.1.212:8181/sample</strong>, 则会跳转到上面的cas登录页面<strong>http://10.10.1.212:8080/cas/login</strong>, 输入用户名和密码, 登录成功后, 则会跳转到sample页面:
+
+![客户端访问页面](/img/cas-client-sample.png)
