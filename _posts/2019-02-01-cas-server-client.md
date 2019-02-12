@@ -103,9 +103,9 @@ comments: []
 2. JDBC驱动包支持
     
 配置好上面的文件后, <strong>tomcat</strong>重启, 登录并不会成功, 最可能出现的错误为下面的页面:
-
+<div class="img_container">
 ![登录常见失败](/img/cas-login-error.png)
-
+</div>
 原因是<strong>CAS</strong>启动时,缺少jdbc服务的支持, 需要在 <strong>cas-overlay-template-5.2</strong>的 *pom.xml* 文件中添加相关依赖,然后重新编译,
 
         <dependencies>
